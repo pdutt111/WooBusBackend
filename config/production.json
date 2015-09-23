@@ -1,0 +1,22 @@
+{
+  "web": {
+    "httpport": 80,
+    "httpsport": 443
+  },
+  "AWS_S3": {},
+  "mailer_options": {},
+  "twilio": {},
+  "smsIndia": {},
+  "mongo": {
+    "location": "mongodb://localhost/ruplee",
+    "debug": false
+  },
+  "mockgoose":false,
+  "token":{
+    "expiry":1
+  },
+  "debug": false,
+  "log": {
+    "level": 0
+  }
+}
