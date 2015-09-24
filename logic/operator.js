@@ -78,15 +78,15 @@ var buses={
         var def= q.defer();
         req.body.user_id=req.user._id;
         req.body.seats=[];
-
+        var rowSeats=req.body.row_seats;
         for(var i=1;i<=req.body.total_seats;i++){
             var window=false;
             //every 1,4,5,8.....are window seats
-            if(((i-1)%4==0)||(i%4==0)){
+            if(((i-1)%rowSeats==0)||(i%rowSeats==0)){
                 window=true;
             }
             //the last row has 5 seats so this is to avoid the 44,45 or 48,49 both being window seats
-            if(i==(req.body.total_seats-1)){
+            if((rowSeats==4&&i==(req.body.total_seats-1))){
                 window=false;
             }
             req.body.seats.push({seat_no:i,is_window:window})

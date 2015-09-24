@@ -64,6 +64,7 @@ var busschema=new Schema({
     user_id:{type:Schema.ObjectId,ref:'user'},
     bus_identifier:String,
     bus_type:String,
+    row_seats:Number,
     fare:Number,
     route:{type:Schema.ObjectId,ref:'routes',index:true},
     discounts:String,
