@@ -18,28 +18,18 @@ var sync=require('../logic/localServerSyncing');
 var userTable;
 userTable=db.getuserdef;
 
-router.post('/status',params({body:['bus_id','temperature','humidity','lat','lon','time',
-        'load_average','ram_used','ram_used_process', 'upload_speed',
-        'download_speed','users_connected','uptime','cpu_model','cpu_speed','cpu_count',
-        'total_ram','speed','bearing']},{message : config.get('error.badrequest')}),
+router.post('/status',params({body:['bus_identifier','temperature','humidity','location','pi_time',
+        'load_average','total_ram','ram_used','ram_used_process', 'upload_speed',
+        'download_speed','users_connected','uptime'
+        ,'speed','bearing']},{message : config.get('error.badrequest')}),
     function(req,res){
     sync.postStatus(req,res)
         .then(function(response){
-            next();
+            res.json(response)
         })
         .catch(function(err){
-            next();
+            res.status(err.status).json(err.message);
         });
-    },
-    function(req,res){
-        sync.getRoute(req,res)
-            .then(function(bus){
-                res.json(bus);
-            })
-            .catch(function(err){
-                res.status(err.status).json(err.message);
-            });
     });
-
 
 module.exports = router;

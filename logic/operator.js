@@ -24,7 +24,7 @@ var routesTable=db.getroutesdef;
 var buses={
     verifyOperator:function(req,res){
       var def= q.defer();
-        if(req.user.is_operator){
+        if(req.user.is_operator&&req.user.is_verified){
             def.resolve()
         }else{
             def.reject({status:401,message:config.get('error.unauthorized')});

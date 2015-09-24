@@ -12,7 +12,6 @@
     "database":"woobus",
     "debug": false
   },
-  "mockgoose":false,
   "token":{
     "expiry":1
   },

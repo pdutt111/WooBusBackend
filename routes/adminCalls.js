@@ -18,7 +18,7 @@ var log = require('tracer').colorConsole(config.get('log'));
 var apn=require('../notificationSenders/apnsender');
 var gcm=require('../notificationSenders/gcmsender');
 var crypto=require('../authentication/crypto');
-
+var usersLogic=require('../logic/Login');
 var adminLogic=require('../logic/admin');
 
 var userTable;
@@ -92,7 +92,102 @@ router.get('/protected/info/operators',params({query:['q'],headers:['authorizati
                 res.status(err.status).json(err.message);
             }).done();
     });
-router.get('/protected/info/buses',params({query:['operator_id'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/protected/info/admins',params({query:['q'],headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.getAdmins(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.post('/protected/info/operator/:id/approve',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.approveOperator(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.get('/protected/info/unverifiedoperators',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.getUnverifiedOperators(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.post('/protected/info/admin/:id/approve',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.approveAdmin(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.get('/protected/info/unverifiedadmins',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.getUnverifiedAdmins(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.get('/protected/info/buses',params({headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
         adminLogic.verifyAdmin(req,res)
             .then(function(){
@@ -171,8 +266,7 @@ router.post('/protected/info/route',params({body:['start','end','boarding_points
             })
             .done();
     });
-router.patch('/protected/info/route/:id',params({body:['start','end','boarding_points','distance',
-        'time_taken','active'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.patch('/protected/info/route/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
         adminLogic.verifyAdmin(req,res)
             .then(function(){
@@ -193,4 +287,45 @@ router.patch('/protected/info/route/:id',params({body:['start','end','boarding_p
             })
             .done();
     });
+router.delete('/protected/info/route/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+            .done();
+    },
+    function(req, res, next) {
+        adminLogic.deleteRoute(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+            .done();
+    });
+router.post('/protected/info/operator/:id/signin',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next){
+        adminLogic.signinoverride(req,res)
+            .then(function(user){
+                req.user=user;
+                req.secret=false;
+                next();
+            }).catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req,res,next){
+        usersLogic.sendToken(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    })
 module.exports = router;

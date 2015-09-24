@@ -11,6 +11,7 @@ var log = require('tracer').colorConsole(config.get('log'));
 var routes = require('./routes/indexCalls');
 var users = require('./routes/usersCalls');
 var operators = require('./routes/operatorCalls');
+var box = require('./routes/syncOperations');
 var admin = require('./routes/adminCalls');
 
 var app = express();
@@ -61,6 +62,7 @@ app.use('/api/v1/', routes);
 app.use('/api/v1/users', users);
 app.use('/api/v1/operators', operators);
 app.use('/api/v1/admin', admin);
+app.use('/api/v1/box', box);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

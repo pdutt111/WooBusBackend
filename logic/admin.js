@@ -27,32 +27,21 @@ var routesTable=db.getroutesdef;
 var functions={
     verifyAdmin:function(req,res){
         var def= q.defer();
-        if(req.user.is_admin){
+        if(req.user.is_admin&&req.user.is_admin){
             def.resolve()
         }else{
             def.reject({status:401,message:config.get('error.unauthorized')});
         }
         return def.promise;
     },
-    getOperators:function(req,res){
-        var def= q.defer();
-        if(typeof req.query.q) {
-            var re = new RegExp("" + req.query.q + "", 'i');
-            userTable.find({name: {$regex: re}, is_operator: true}, "_id name email phonenumber is_verified address")
-                .exec()
-                .then(function (rows) {
-                    def.resolve(rows);
-                })
-                .then(null,function(err){
-                    def.reject({status:500,message:config.get('error.dberror')});
-                });
-        }
-        return def.promise;
-    },
     getBuses:function(req,res){
         var def= q.defer();
-        busTable.find({user_id:req.query.operator_id,is_deleted:false},"fare discounts departure_time arrival_time " +
-            "distance images boarding_points route total_seats is_available")
+        var search={user_id:req.query.operator_id,is_deleted:false}
+        if(!req.query.operator_id){
+            delete search.user_id;
+        }
+        busTable.find(search,"fare discounts departure_time arrival_time " +
+            "distance images boarding_points route total_seats seats is_available")
             .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
             .exec()
             .then(function(buses){
@@ -90,7 +79,7 @@ var functions={
     },
     getRoutes:function(req,res){
         var def= q.defer();
-        routesTable.find({active:true},"start end fare distance time_taken active scheduled_stops boarding_points",function(err,rows){
+        routesTable.find({},"start end fare distance time_taken active scheduled_stops boarding_points",function(err,rows){
             if(!err){
                 def.resolve(rows);
             }else{
@@ -102,7 +91,7 @@ var functions={
     },
     getRoute:function(req,res){
         var def= q.defer();
-        routesTable.findOne({_id:new ObjectId(req.params.id),active:true},"start end fare distance time_taken active " +
+        routesTable.findOne({_id:new ObjectId(req.params.id)},"start end fare distance time_taken active " +
             "scheduled_stops boarding_points",function(err,route){
             if(!err){
                 def.resolve(route);
@@ -111,6 +100,80 @@ var functions={
             }
 
         })
+        return def.promise;
+    },
+    getOperators:function(req,res){
+        var def= q.defer();
+        if(typeof req.query.q) {
+            var re = new RegExp("" + req.query.q + "", 'i');
+            userTable.find({name: {$regex: re}, is_operator: true}, "_id name email phonenumber is_verified address")
+                .exec()
+                .then(function (rows) {
+                    def.resolve(rows);
+                })
+                .then(null,function(err){
+                    def.reject({status:500,message:config.get('error.dberror')});
+                });
+        }
+        return def.promise;
+    },
+    getAdmins:function(req,res){
+        var def= q.defer();
+        if(typeof req.query.q) {
+            var re = new RegExp("" + req.query.q + "", 'i');
+            userTable.find({name: {$regex: re}, is_admin: true}, "_id name email phonenumber is_verified address")
+                .exec()
+                .then(function (rows) {
+                    def.resolve(rows);
+                })
+                .then(null,function(err){
+                    def.reject({status:500,message:config.get('error.dberror')});
+                });
+        }
+        return def.promise;
+    },
+    approveOperator:function(req,res){
+        var def= q.defer();
+        userTable.update({_id:new ObjectId(req.params.id)},{$set:{is_verified:true}},function(err,info){
+           if(!err){
+               def.resolve(config.get('ok'))
+           }else{
+               def.reject({status:500,message:config.get('error.dberror')});
+           }
+        });
+        return def.promise;
+    },
+    getUnverifiedOperators:function(req,res){
+        var def= q.defer();
+        userTable.find({is_operator:true,is_verified:false},"name email is_verified",function(err,operators){
+            if(!err){
+                def.resolve(operators);
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
+    approveAdmin:function(req,res){
+        var def= q.defer();
+        userTable.update({_id:new ObjectId(req.params.id)},{$set:{is_verified:true}},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'))
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
+    getUnverifiedAdmins:function(req,res){
+        var def= q.defer();
+        userTable.find({is_admin:true,is_verified:false},"name email is_verified",function(err,operators){
+            if(!err){
+                def.resolve(operators);
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
         return def.promise;
     },
     addRoutes:function(req,res){
@@ -152,6 +215,17 @@ var functions={
         });
         return def.promise;
     },
+    deleteRoute:function(req,res){
+        var def= q.defer();
+        routesTable.update({_id:new ObjectId(req.params.id)},{$set:{active:false}},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'));
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
     resetImages:function(req,res){
         var def= q.defer();
         busTable.update({_id:new ObjectId(req.params.id)},{$set:{images:[]}},function(err,info){
@@ -161,6 +235,17 @@ var functions={
                 def.reject({status:500,message:config.get('error.dberror')});
             }
         });
+        return def.promise;
+    },
+    signinoverride:function(req,res){
+        var def= q.defer();
+        userTable.findOne({_id:new ObjectId(req.params.id)},"password email name").exec()
+            .then(function(user){
+                        def.resolve(user);
+            })
+            .then(null,function(err){
+                def.reject({status: 500, message: config.get('error.dberror')});
+            });
         return def.promise;
     }
 }

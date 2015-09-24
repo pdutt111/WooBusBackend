@@ -8,9 +8,6 @@ var events = require('../events');
 var log = require('tracer').colorConsole(config.get('log'));
 var ObjectId = require('mongoose').Types.ObjectId;
 var validate = require('mongoose-validator');
-if(config.get('mockgoose')) {
-    //mockgoose(mongoose);
-}
 var nameValidator = [
     validate({
         validator: 'isLength',
@@ -29,6 +26,7 @@ var userdef;
 var pindef;
 var busdef;
 var routesdef;
+var cachefidef;
 var citiesdef;
 var bookingsdef;
 var buslocationdef;
@@ -76,8 +74,6 @@ var busschema=new Schema({
     in_transit:{type:Boolean,default:false},
     seats:[{seat_no:Number,is_window:Boolean,is_booked:{type:Boolean,default:false},booking_id:{type:Schema.ObjectId,ref:'bookings'},_id:false}],
     in_booking:{type:Boolean,default:true},
-    media_loaded:[{name:String,path:String,is_active:Boolean,views:Number,skips:Number,_id:false}],
-    media_update:[{path:String,name:String,Description:String,replace:String}],
     loo_requests:{type:Number,default:0},
     is_completed:{type:Boolean,default:false},
     created_time:{type:Date,default:Date.now},
@@ -86,7 +82,11 @@ var busschema=new Schema({
 var routesSchema=new Schema({
     start:{type:String,index:true},
     end:{type:String,index:true},
-    boarding_points:[{point:String, location:{type:[Number],index:"2dsphere"},time_taken:Number,_id:false}],
+    boarding_points:[{
+        point:String,
+        location:{type:[Number],index:"2dsphere"},
+        time_taken:Number,
+        _id:false}],
     scheduled_stops:[{
         name:String,
         location:{type:[Number], index:"2dsphere"},
@@ -94,6 +94,7 @@ var routesSchema=new Schema({
         is_loo:Boolean,
         is_snacks:Boolean,
         is_food:Boolean,
+        time_taken:Number,
         _id:false
     }],
     fare:Number,
@@ -104,7 +105,7 @@ var routesSchema=new Schema({
     modified_time:{type:Date,default:Date.now}
 });
 var buslocationschema=new Schema({
-    bus_identifier:String,
+    bus_identifier:{type:String},
     temperature:Number,
     humidity:String,
     speed:Number,
@@ -139,6 +140,13 @@ var citiesSchema=new Schema({
     location:{type:[Number], index:"2dsphere"},
     operators:{name:String,buses:String}
 });
+var cachefiSchema=new Schema({
+    bus_identifier:{type:String,unique:true},
+    media_loaded:[{name:String,path:String,is_active:Boolean,views:Number,skips:Number,_id:false}],
+    media_update:[{path:String,name:String,Description:String,replace:String}],
+    is_syncing:Boolean,
+    in_standby:Boolean
+})
 bookingschema.index({bus_id:1,seat_no:1},{unique:true});
 routesSchema.index({start:1,end:1},{unique:true});
 db.on('error', function(err){
@@ -151,16 +159,18 @@ db.on('error', function(err){
     userdef=db.model('user',userSchema);
     pindef=db.model('pins',pinschema);
     busdef=db.model('buses',busschema);
+    buslocationdef=db.model('buslocation',buslocationschema);
     bookingsdef=db.model('bookings',bookingschema);
+    cachefidef=db.model('cachefi',cachefiSchema);
     citiesdef=db.model('cities',citiesSchema);
     routesdef=db.model('routes',routesSchema);
-    buslocationdef=db.model('buslocation',buslocationschema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
     exports.getbookingsdef=bookingsdef;
     exports.getcitiesdef=citiesdef;
     exports.getuserdef= userdef;
+    exports.getcachefidef= cachefidef;
     exports.getbuslocationdef= buslocationdef;
     exports.getroutesdef= routesdef;
     events.emitter.emit("db_data");
