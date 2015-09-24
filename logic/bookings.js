@@ -17,13 +17,14 @@ var crypto=require('../authentication/crypto');
 var userTable=db.getuserdef;
 var busTable=db.getbusdef;
 var cityTable=db.getcitiesdef;
-var bookingsTable=db.getbookingsdef;
+var bookingsTable=db.getbookingsdef
+var routeTable=db.getroutesdef;;
 
 var bookings={
     cityAutoSuggest:function(req,res){
         var def= q.defer();
-        if(typeof req.query.q == string && req.query.q.length>3) {
-            var re = new RegExp("" + req.query.q + "", 'i');
+        if(typeof req.query.q == "string" && req.query.q.length>3) {
+            var re = new RegExp(req.query.q, 'i');
             cityTable.find({name: {$regex: re}}, "name -_id", function (err,docs) {
                 if(!err) {
                     def.resolve(docs);
@@ -36,12 +37,49 @@ var bookings={
         }
         return def.promise;
     },
+    getRoute:function(req,res){
+        var def= q.defer();
+        routeTable.findOne({start:req.query.start,end:req.query.end},"_id",function(err,route){
+            console.log(err,route);
+            if(!err){
+                if(route) {
+                    def.resolve(route);
+                }else{
+                    def.reject({status:200,message:config.get("error.noroute")});
+                }
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+
+        });
+        return def.promise;
+    },
     getBuses:function(req,res){
         var def= q.defer();
-        busTable.find({start:req.query.start,end:req.query.end,in_booking:true},"start end fare discounts " +
+        busTable.find({route:req.route,in_booking:true,departure_time:{$gt:new Date()}},"fare discounts " +
             "discounted_price departure_time" +
             " arrival_time boarding_points total_seats " +
-            "images media_loaded distance seats bus_identifier",function(err,docs){
+            "images media_loaded distance route seats bus_identifier")
+            .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .exec(function(err,docs){
+            if(!err){
+                def.resolve(docs);
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+
+        });
+        return def.promise;
+    },
+    getBus:function(req,res){
+        var def= q.defer();
+        busTable.findOne({_id:new ObjectId(req.params.id)},"fare discounts " +
+            "discounted_price departure_time" +
+            " arrival_time boarding_points total_seats " +
+            "images media_loaded route user_id distance seats bus_identifier")
+            .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .populate("user_id","name -_id")
+            .exec(function(err,docs){
             if(!err){
                 def.resolve(docs);
             }else{

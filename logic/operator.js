@@ -33,8 +33,10 @@ var buses={
     },
     getBuses:function(req,res){
         var def= q.defer();
-      busTable.find({user_id:req.user._id},"start end fare route discounts departure_time arrival_time distance " +
-          "images boarding_points total_seats is_available").populate("route").exec()
+      busTable.find({user_id:req.user._id,is_deleted:false},"fare route discounts departure_time arrival_time distance " +
+          "images boarding_points total_seats is_available")
+          .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+          .exec()
           .then(function(buses){
               def.resolve(buses);
           })
@@ -45,8 +47,12 @@ var buses={
     },
     getBus:function(req,res){
         var def= q.defer();
-        busTable.findOne({user_id:req.user._id,_id:req.param.id},"start end fare discounts departure_time arrival_time" +
-            " distance images boarding_points total_seats seats in_transit in_booking is_completed").exec()
+        busTable.findOne({user_id:req.user._id,_id:new ObjectId(req.params.id),is_deleted:false},"fare discounts " +
+            "departure_time arrival_time" +
+            " distance images total_seats seats discounted_price bus_type in_transit" +
+            " in_booking route is_completed")
+            .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .exec()
             .then(function(bus){
                 def.resolve(bus);
             })
@@ -72,12 +78,18 @@ var buses={
         var def= q.defer();
         req.body.user_id=req.user._id;
         req.body.seats=[];
+
         for(var i=1;i<=req.body.total_seats;i++){
             var window=false;
-            if((i-1)%4==0||i%4==0){
+            //every 1,4,5,8.....are window seats
+            if(((i-1)%4==0)||(i%4==0)){
                 window=true;
             }
-            req.body.seats.push({seat_no:i,is_window:true})
+            //the last row has 5 seats so this is to avoid the 44,45 or 48,49 both being window seats
+            if(i==(req.body.total_seats-1)){
+                window=false;
+            }
+            req.body.seats.push({seat_no:i,is_window:window})
         }
         var bus=new busTable(req.body);
         bus.save(function(err,bus,info){
@@ -89,10 +101,21 @@ var buses={
         })
         return def.promise;
     },
+    deleteBus:function(req,res){
+        var def= q.defer();
+        busTable.update({_id:new ObjectId(req.params.id),user_id:req.user._id},{$set:{is_deleted:true}},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'));
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
     patchBus:function(req,res){
         var def= q.defer();
         req.body.user_id=req.user._id;
-       busTable.update({bus_id:req.param.id,user_id:req.user._id},{$set:req.body},function(err,info){
+       busTable.update({_id:new ObjectId(req.params.id),user_id:req.user._id},{$set:req.body},function(err,info){
            if(!err){
                def.resolve(config.get('ok'));
            }else{
@@ -104,7 +127,23 @@ var buses={
     addImages:function(req,res){
         var def= q.defer();
         console.log(req.files);
-        busTable.update({bus_id:req.param.id,user_id:req.user._id},{$addToSet:{images:req.files.path}},function(err,info){
+        var paths=[];
+        for(var i=0;i<req.files.length;i++){
+            paths.push(req.files[i].path);
+        }
+        console.log(paths);
+        busTable.update({_id:new ObjectId(req.params.id),user_id:req.user._id},{$addToSet:{images:{$each:paths}}},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'));
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
+    resetImages:function(req,res){
+        var def= q.defer();
+        busTable.update({_id:new ObjectId(req.params.id),user_id:req.user._id},{$set:{images:[]}},function(err,info){
             if(!err){
                 def.resolve(config.get('ok'));
             }else{
@@ -113,6 +152,6 @@ var buses={
         });
         return def.promise;
     }
-}
+};
 
 module.exports=buses;

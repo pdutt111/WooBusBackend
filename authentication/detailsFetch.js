@@ -24,7 +24,7 @@ var details=function(req,res,next){
             }
         });
     }else{
-        def.resolve();
+        def.resolve(req.user);
     }
     return def.promise;
 }

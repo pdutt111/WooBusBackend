@@ -28,7 +28,6 @@ var db=mongoose.createConnection(config.get('mongo.location'),config.get('mongo.
 var userdef;
 var pindef;
 var busdef;
-var stopsdef;
 var routesdef;
 var citiesdef;
 var bookingsdef;
@@ -63,17 +62,16 @@ var pinschema=new Schema({
 })
 var busschema=new Schema({
     user_id:{type:Schema.ObjectId,ref:'user'},
-    start:{type:String,index:true},
-    end:{type:String,index:true},
     bus_identifier:String,
     bus_type:String,
     fare:Number,
-    route:{type:Schema.ObjectId,ref:'routes'},
+    route:{type:Schema.ObjectId,ref:'routes',index:true},
     discounts:String,
     discounted_price:Number,
     images:[String],
     total_seats:Number,
     departure_time:Date,
+    is_deleted:{type:Boolean,default:false},
     in_transit:{type:Boolean,default:false},
     seats:[{seat_no:Number,is_window:Boolean,is_booked:{type:Boolean,default:false},booking_id:{type:Schema.ObjectId,ref:'bookings'},_id:false}],
     in_booking:{type:Boolean,default:true},
@@ -152,15 +150,14 @@ db.on('error', function(err){
     userdef=db.model('user',userSchema);
     pindef=db.model('pins',pinschema);
     busdef=db.model('buses',busschema);
-    citiesdef=db.model('bookings',bookingschema);
-    bookingsdef=db.model('cities',citiesSchema);
+    bookingsdef=db.model('bookings',bookingschema);
+    citiesdef=db.model('cities',citiesSchema);
     routesdef=db.model('routes',routesSchema);
     buslocationdef=db.model('buslocation',buslocationschema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
     exports.getbookingsdef=bookingsdef;
-    exports.getstopsdef=stopsdef;
     exports.getcitiesdef=citiesdef;
     exports.getuserdef= userdef;
     exports.getbuslocationdef= buslocationdef;

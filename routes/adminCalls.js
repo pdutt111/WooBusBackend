@@ -54,6 +54,25 @@ router.get('/protected/info/routes',params({headers:['authorization']},{message 
                 res.status(err.status).json(err.message);
             }).done();
     });
+router.get('/protected/info/route/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        adminLogic.verifyAdmin(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        adminLogic.getRoute(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
 router.get('/protected/info/operators',params({query:['q'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
         adminLogic.verifyAdmin(req,res)

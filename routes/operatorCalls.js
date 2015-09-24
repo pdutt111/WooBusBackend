@@ -165,4 +165,44 @@ router.post('/protected/info/bus/:id/images',upload.array('photos', 12),params({
                 res.status(err.status).json(err.message);
             }).done();
     });
+router.delete('/protected/info/bus/:id/images',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        console.log(req.files);
+        operatorLogic.verifyOperator(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        operatorLogic.resetImages(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.delete('/protected/info/bus/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+        console.log(req.files);
+        operatorLogic.verifyOperator(req,res)
+            .then(function(){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req, res, next) {
+        operatorLogic.deleteBus(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
 module.exports = router;

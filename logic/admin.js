@@ -51,7 +51,10 @@ var functions={
     },
     getBuses:function(req,res){
         var def= q.defer();
-        busTable.find({user_id:req.query.operator_id},"start end fare discounts departure_time arrival_time distance images boarding_points total_seats is_available").exec()
+        busTable.find({user_id:req.query.operator_id,is_deleted:false},"fare discounts departure_time arrival_time " +
+            "distance images boarding_points route total_seats is_available")
+            .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .exec()
             .then(function(buses){
                 def.resolve(buses);
             })
@@ -62,8 +65,10 @@ var functions={
     },
     getBus:function(req,res){
         var def= q.defer();
-        busTable.findOne({_id:req.param.id},"start end fare discounts departure_time arrival_time" +
-            " distance images boarding_points total_seats seats in_transit in_booking is_completed").exec()
+        busTable.findOne({_id:new ObjectId(req.params.id),is_deleted:false},"start end fare discounts departure_time arrival_time" +
+            " distance images boarding_points total_seats discounted_price route bus_type seats in_transit in_booking is_completed")
+            .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .exec()
             .then(function(bus){
                 def.resolve(bus);
             })
@@ -74,7 +79,7 @@ var functions={
     },
     patchBus:function(req,res){
         var def= q.defer();
-        busTable.update({_id:req.param.id},{$set:req.body},function(err,info){
+        busTable.update({_id:new ObjectId(req.params.id),is_deleted:false},{$set:req.body},function(err,info){
             if(!err){
                 def.resolve(config.get('ok'));
             }else{
@@ -89,6 +94,19 @@ var functions={
             "time_taken",function(err,rows){
             if(!err){
                 def.resolve(rows);
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+
+        })
+        return def.promise;
+    },
+    getRoute:function(req,res){
+        var def= q.defer();
+        routesTable.findOne({_id:new ObjectId(req.params.id),active:true},"start end boarding_points scheduled_stops distance" +
+            "time_taken",function(err,route){
+            if(!err){
+                def.resolve(route);
             }else{
                 def.reject({status:500,message:config.get('error.dberror')});
             }
@@ -115,7 +133,29 @@ var functions={
     },
     patchRoutes:function(req,res){
         var def= q.defer();
-        routesTable.update({_id:req.param.id},{$set:req.body},function(err,info){
+        routesTable.update({_id:new ObjectId(req.params.id)},{$set:req.body},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'));
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
+    deleteBus:function(req,res){
+        var def= q.defer();
+        busTable.update({_id:new ObjectId(req.params.id)},{$set:{is_deleted:true}},function(err,info){
+            if(!err){
+                def.resolve(config.get('ok'));
+            }else{
+                def.reject({status:500,message:config.get('error.dberror')});
+            }
+        });
+        return def.promise;
+    },
+    resetImages:function(req,res){
+        var def= q.defer();
+        busTable.update({_id:new ObjectId(req.params.id)},{$set:{images:[]}},function(err,info){
             if(!err){
                 def.resolve(config.get('ok'));
             }else{

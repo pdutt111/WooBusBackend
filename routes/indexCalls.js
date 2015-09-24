@@ -12,10 +12,12 @@ var log = require('tracer').colorConsole(config.get('log'));
 var apn=require('../notificationSenders/apnsender');
 var gcm=require('../notificationSenders/gcmsender');
 var bookinglogic=require('../logic/bookings');
-var userTable;
-  userTable=db.getuserdef;
+var userTable=db.getuserdef;
+
+
 router.get('/protected/autocomplete',params({query:['q'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
+        console.log(req.user);
       bookinglogic.cityAutoSuggest(req,res)
           .then(function(cities){
             res.json(cities);
@@ -26,6 +28,16 @@ router.get('/protected/autocomplete',params({query:['q'],headers:['authorization
     });
 router.get('/protected/buses',params({query:['start','end'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
+        bookinglogic.getRoute(req,res)
+            .then(function(route){
+                req.route=route._id;
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+    },
+    function(req,res,next){
       bookinglogic.getBuses(req,res)
           .then(function(cities){
             res.json(cities);
@@ -34,8 +46,19 @@ router.get('/protected/buses',params({query:['start','end'],headers:['authorizat
             res.status(err.status).json(err.message);
           })
     });
+router.get('/protected/bus/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next){
+        bookinglogic.getBus(req,res)
+            .then(function(cities){
+                res.json(cities);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+    });
 router.post('/protected/book',params({body:['bus_id','amount','seat_no'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
+        console.log(req.user);
       bookinglogic.bookbus.bookingsTableEntry(req,res)
           .then(function(booking){
             req.booking=booking;
