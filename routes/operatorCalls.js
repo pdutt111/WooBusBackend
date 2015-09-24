@@ -107,7 +107,7 @@ router.get('/protected/info/bus/:id',params({headers:['authorization']},{message
                 res.status(err.status).json(err.message);
             }).done();
     });
-router.post('/protected/info/bus',params({body:['start','end','bus_identifier','fare','departure_time','route','total_seats'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.post('/protected/info/bus',params({body:['bus_identifier','fare','departure_time','route','total_seats'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
         operatorLogic.verifyOperator(req,res)
             .then(function(){
