@@ -29,6 +29,8 @@ var userdef;
 var pindef;
 var busdef;
 var stopsdef;
+var routesdef;
+var citiesdef;
 var bookingsdef;
 var buslocationdef;
 var Schema = mongoose.Schema;
@@ -42,15 +44,14 @@ var userSchema=new Schema({
     phonenumber:String,
     password:{type:String,required:true},
     name:{type:String},
-    is_verified:{type:Boolean,default:false},
     device:{service:String,reg_id:String,active:{type:Boolean,default:true}},
     contacts:[{phonenumber:{type:String},name:String,_id:false}],
     profession:{type:String},
     url:{type:String},
     is_operator:Boolean,
-    devices:[{device_id:String,registration_id:String,enabled:Boolean,last_used:Date}],
+    is_admin:Boolean,
     address:{type:String},
-    loc:{type:[Number], index:"2dsphere"},
+    is_verified:{type:Boolean,default:false},
     is_service:{type:Boolean,default:false},
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
@@ -62,36 +63,44 @@ var pinschema=new Schema({
 })
 var busschema=new Schema({
     user_id:{type:Schema.ObjectId,ref:'user'},
-    start:String,
-    end:String,
+    start:{type:String,index:true},
+    end:{type:String,index:true},
     bus_identifier:String,
+    bus_type:String,
     fare:Number,
+    route:{type:Schema.ObjectId,ref:'routes'},
     discounts:String,
-    scheduled_stops:[{stop:{type:Schema.ObjectId,ref:'stops'},time:Date,_id:false}],
     discounted_price:Number,
-    departure_time:Date,
-    arrival_time:Date,
-    distance:Number,
     images:[String],
-    boarding_points:[{point:String, location:{type:[Number],index:"2dsphere"},time:Date,_id:false}],
     total_seats:Number,
-    in_transit:Boolean,
-    seats:[{seat_no:Number,is_window:Boolean,is_booked:Boolean,booking_id:{type:Schema.ObjectId,ref:'bookings'},_id:false}],
-    in_booking:Boolean,
+    departure_time:Date,
+    in_transit:{type:Boolean,default:false},
+    seats:[{seat_no:Number,is_window:Boolean,is_booked:{type:Boolean,default:false},booking_id:{type:Schema.ObjectId,ref:'bookings'},_id:false}],
+    in_booking:{type:Boolean,default:true},
     media_loaded:[{name:String,path:String,is_active:Boolean,views:Number,skips:Number,_id:false}],
     media_update:[{path:String,name:String,Description:String,replace:String}],
-    loo_requests:Number,
-    is_completed:Boolean,
+    loo_requests:{type:Number,default:0},
+    is_completed:{type:Boolean,default:false},
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 });
-var stopschema=new Schema({
-    name:String,
-    location:{type:[Number], index:"2dsphere"},
-    restaurants_available:[String],
-    is_loo:Boolean,
-    is_snacks:Boolean,
-    is_food:Boolean,
+var routesSchema=new Schema({
+    start:{type:String,index:true},
+    end:{type:String,index:true},
+    boarding_points:[{point:String, location:{type:[Number],index:"2dsphere"},time_taken:Number,_id:false}],
+    scheduled_stops:[{
+        name:String,
+        location:{type:[Number], index:"2dsphere"},
+        restaurants_available:[String],
+        is_loo:Boolean,
+        is_snacks:Boolean,
+        is_food:Boolean,
+        _id:false
+    }],
+    fare:Number,
+    distance:Number,
+    time_taken:Number,
+    active:{type:Boolean,default:false},
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 });
@@ -126,7 +135,13 @@ var bookingschema=new Schema({
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 });
+var citiesSchema=new Schema({
+    name:{type:String,index:true},
+    location:{type:[Number], index:"2dsphere"},
+    operators:{name:String,buses:String}
+});
 bookingschema.index({bus_id:1,seat_no:1},{unique:true});
+routesSchema.index({start:1,end:1},{unique:true});
 db.on('error', function(err){
     log.info(err);
 });
@@ -137,15 +152,18 @@ db.on('error', function(err){
     userdef=db.model('user',userSchema);
     pindef=db.model('pins',pinschema);
     busdef=db.model('buses',busschema);
-    stopsdef=db.model('stops',stopschema);
-    bookingsdef=db.model('bookings',bookingschema);
+    citiesdef=db.model('bookings',bookingschema);
+    bookingsdef=db.model('cities',citiesSchema);
+    routesdef=db.model('routes',routesSchema);
     buslocationdef=db.model('buslocation',buslocationschema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
     exports.getbookingsdef=bookingsdef;
     exports.getstopsdef=stopsdef;
+    exports.getcitiesdef=citiesdef;
     exports.getuserdef= userdef;
     exports.getbuslocationdef= buslocationdef;
+    exports.getroutesdef= routesdef;
     events.emitter.emit("db_data");
 

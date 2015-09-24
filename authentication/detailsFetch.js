@@ -15,7 +15,8 @@ var reviewTable;
 var details=function(req,res,next){
     var def= q.defer();
     if(req.originalUrl.indexOf("/info")>-1) {
-        userTable.findOne({_id: req.user._id}, "name email password phonenumber is_operator", function (err, user) {
+        userTable.findOne({_id: req.user._id}, "name email password phonenumber created_time is_admin " +
+            "is_operator", function (err, user) {
             if (!err&&user) {
                 def.resolve(user)
             }else{

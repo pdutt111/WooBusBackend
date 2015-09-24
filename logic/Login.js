@@ -104,9 +104,18 @@ var users={
             secret:req.user._id,
             expires: expires
         };
+        if(!req.secret){
+           delete response.secret;
+        }
+
         def.resolve(response);
         return def.promise;
+    },
+    getstate:function(req,res){
+        var def= q.defer();
+        def.resolve(config.get('state'));
+        return def.promise;
     }
-}
 
+}
 module.exports=users;

@@ -8,8 +8,10 @@ var bodyParser = require('body-parser');
 var auth=require('./authentication/authentication');
 var details=require('./authentication/detailsFetch');
 var log = require('tracer').colorConsole(config.get('log'));
-var routes = require('./routes/index');
-var users = require('./routes/users');
+var routes = require('./routes/indexCalls');
+var users = require('./routes/usersCalls');
+var operators = require('./routes/operatorCalls');
+var admin = require('./routes/adminCalls');
 
 var app = express();
 
@@ -20,8 +22,9 @@ app.set('view engine', 'ejs');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit:'10mb'}));
+app.use(bodyParser.raw({ limit:'10mb'}));
+app.use(bodyParser.urlencoded({ extended: false, limit:'10mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -56,6 +59,8 @@ app.use(
  */
 app.use('/api/v1/', routes);
 app.use('/api/v1/users', users);
+app.use('/api/v1/operators', operators);
+app.use('/api/v1/admin', admin);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

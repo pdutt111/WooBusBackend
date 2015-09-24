@@ -35,6 +35,7 @@ router.post('/create',params({body:['email','password','name','is_operator']},{m
         usersLogic.userCreate(req,res)
             .then(function(user){
                 req.user=user;
+                req.secret=false;
                 next();
             })
             .catch(function(err){
@@ -50,11 +51,12 @@ router.post('/create',params({body:['email','password','name','is_operator']},{m
                 res.status(err.status).json(err.message);
             }).done();
     });
-router.post('signin',params({body:['email','password']}),
+router.post('/signin',params({body:['email','password']},{message : config.get('error.badrequest')}),
     function(req,res,next){
     usersLogic.signin(req,res)
         .then(function(user){
             req.user=user;
+            req.secret=false;
             next();
         }).catch(function(err){
             res.status(err.status).json(err.message);
@@ -73,6 +75,7 @@ router.post('/protected/info/renew',params({body:['secret']},{message : config.g
     function(req,res,next){
         usersLogic.renewToken(req,res)
             .then(function(){
+                req.secret=false;
                 next();
             })
             .catch(function(err){
@@ -91,7 +94,19 @@ router.post('/protected/info/renew',params({body:['secret']},{message : config.g
     });
 
 router.get('/protected/info',params({headers:['authorization']},{message : config.get('error.badrequest')}),function(req,res,next){
+    req.user=req.user.toObject();
+    delete req.user.password;
+    delete req.user._id;
     res.json(req.user);
 });
-
+router.get('/protected/state',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next){
+        usersLogic.getstate(req,res)
+            .then(function(state){
+                res.json(state);
+            })
+            .catch(function(err){
+                res.status(500).json(config.get('error.dberror'));
+            })
+    });
 module.exports = router;

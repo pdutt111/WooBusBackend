@@ -12,6 +12,12 @@
     "database":"woobus",
     "debug": false
   },
+  "state":{
+    "bookings":true,
+    "entertainment":false,
+    "ebooks":false,
+    "apps":true
+  },
   "mockgoose":true,
   "token":{
     "expiry":25
@@ -22,6 +28,10 @@
   },
   "gcmServerKey":"",
   "error": {
+    "exists": {
+      "result": "error",
+      "description": "duplicate entry"
+    },
     "webtoken": {
       "expired": {
         "result": "error",
@@ -43,7 +53,7 @@
       },
       "exists": {
         "result": "error",
-        "description": "user already present"
+        "description": "duplicate entry"
       },
       "errorcreating": {
         "result": "error",
