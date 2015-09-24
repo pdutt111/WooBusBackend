@@ -8,7 +8,8 @@
   "twilio": {},
   "smsIndia": {},
   "mongo": {
-    "location": "mongodb://localhost/ruplee",
+    "location": "localhost",
+    "database":"woobus",
     "debug": false
   },
   "mockgoose":false,

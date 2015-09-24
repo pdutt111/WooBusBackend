@@ -90,8 +90,7 @@ var functions={
     },
     getRoutes:function(req,res){
         var def= q.defer();
-        routesTable.find({active:true},"start end boarding_points scheduled_stops distance" +
-            "time_taken",function(err,rows){
+        routesTable.find({active:true},"start end fare distance time_taken active scheduled_stops boarding_points",function(err,rows){
             if(!err){
                 def.resolve(rows);
             }else{
@@ -103,8 +102,8 @@ var functions={
     },
     getRoute:function(req,res){
         var def= q.defer();
-        routesTable.findOne({_id:new ObjectId(req.params.id),active:true},"start end boarding_points scheduled_stops distance" +
-            "time_taken",function(err,route){
+        routesTable.findOne({_id:new ObjectId(req.params.id),active:true},"start end fare distance time_taken active " +
+            "scheduled_stops boarding_points",function(err,route){
             if(!err){
                 def.resolve(route);
             }else{
