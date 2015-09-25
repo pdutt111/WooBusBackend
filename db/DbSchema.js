@@ -29,6 +29,7 @@ var routesdef;
 var cachefidef;
 var citiesdef;
 var bookingsdef;
+var catalogdef;
 var buslocationdef;
 var Schema = mongoose.Schema;
 mongoose.set('debug', config.get('mongo.debug'));
@@ -141,11 +142,20 @@ var citiesSchema=new Schema({
     operators:{name:String,buses:String}
 });
 var cachefiSchema=new Schema({
-    bus_identifier:{type:String,unique:true},
-    media_loaded:[{name:String,path:String,is_active:Boolean,views:Number,skips:Number,_id:false}],
-    media_update:[{path:String,name:String,Description:String,replace:String}],
-    is_syncing:Boolean,
-    in_standby:Boolean
+    bus_identifier:{type:String,unique:true,index:true,dropDups:true},
+    media_load:[{type:Schema.ObjectId,ref:'catalog'}],
+    in_standby:Boolean,
+    local_language:String,
+    last_refresh:Date
+});
+var catalogSchema=new Schema({
+    name:String,
+    description:String,
+    path:String,
+    skips:Number,
+    views:Number,
+    language:String,
+    content_type:String
 })
 bookingschema.index({bus_id:1,seat_no:1},{unique:true});
 routesSchema.index({start:1,end:1},{unique:true});
@@ -164,6 +174,7 @@ db.on('error', function(err){
     cachefidef=db.model('cachefi',cachefiSchema);
     citiesdef=db.model('cities',citiesSchema);
     routesdef=db.model('routes',routesSchema);
+    catalogdef=db.model('catalog',catalogSchema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
@@ -171,6 +182,7 @@ db.on('error', function(err){
     exports.getcitiesdef=citiesdef;
     exports.getuserdef= userdef;
     exports.getcachefidef= cachefidef;
+    exports.getcatalogdef= catalogdef;
     exports.getbuslocationdef= buslocationdef;
     exports.getroutesdef= routesdef;
     events.emitter.emit("db_data");

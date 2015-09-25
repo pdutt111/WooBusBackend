@@ -17,6 +17,26 @@ var gcm=require('../notificationSenders/gcmsender');
 var sync=require('../logic/localServerSyncing');
 var userTable;
 userTable=db.getuserdef;
+router.post('/boxinit',params({body:['bus_identifier','media_load','local_language']},{message : config.get('error.badrequest')}),
+    function(req,res){
+        sync.boxinit(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            });
+    });
+router.post('/content',params({body:['name','description','language','path','content_type']},{message : config.get('error.badrequest')}),
+    function(req,res){
+        sync.addContent(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            });
+    });
 
 router.post('/status',params({body:['bus_identifier','temperature','humidity','location','pi_time',
         'load_average','total_ram','ram_used','ram_used_process', 'upload_speed',
@@ -31,5 +51,42 @@ router.post('/status',params({body:['bus_identifier','temperature','humidity','l
             res.status(err.status).json(err.message);
         });
     });
-
+router.get('/media',params({query:['bus_identifier']},{message : config.get('error.badrequest')}),
+    function(req,res){
+        sync.getMedia(req,res)
+            .then(function(response){
+                res.json(response)
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            });
+    });
+router.post('/refreshed',params({body:['bus_identifier']},{message : config.get('error.badrequest')}),function(req,res){
+    sync.syncdone(req,res)
+        .then(function(response){
+            res.json(response)
+        })
+        .catch(function(err){
+            res.status(err.status).json(err.message);
+        });
+});
+router.post('/journey/completed',params({body:['bus_identifier','id']},{message : config.get('error.badrequest')}),
+    function(req,res,next){
+        sync.journeyCompleted(req,res)
+            .then(function(response){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+    },
+    function(req,res,next){
+        sync.getRoute(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+    });
 module.exports = router;

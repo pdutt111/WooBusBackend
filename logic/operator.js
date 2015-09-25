@@ -33,7 +33,7 @@ var buses={
     },
     getBuses:function(req,res){
         var def= q.defer();
-      busTable.find({user_id:req.user._id,is_deleted:false},"fare route discounts departure_time arrival_time distance " +
+      busTable.find({user_id:req.user._id,is_deleted:false},"fare route discounts departure_time distance " +
           "images boarding_points total_seats is_available")
           .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
           .exec()
@@ -48,7 +48,7 @@ var buses={
     getBus:function(req,res){
         var def= q.defer();
         busTable.findOne({user_id:req.user._id,_id:new ObjectId(req.params.id),is_deleted:false},"fare discounts " +
-            "departure_time arrival_time" +
+            "departure_time" +
             " distance images total_seats seats discounted_price bus_type in_transit" +
             " in_booking route is_completed")
             .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
