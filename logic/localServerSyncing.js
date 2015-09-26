@@ -102,6 +102,7 @@ var syncing={
         busTable.findOne({_id:new ObjectId(req.params.id),is_deleted:false},"start end fare discounts departure_time " +
             " distance images boarding_points total_seats discounted_price route bus_type seats in_transit in_booking is_completed")
             .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
+            .exec()
             .then(function(buses){
                 def.resolve(buses[0]);
             })

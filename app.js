@@ -13,7 +13,7 @@ var users = require('./routes/usersCalls');
 var operators = require('./routes/operatorCalls');
 var box = require('./routes/syncOperations');
 var admin = require('./routes/adminCalls');
-
+require('./jobs/busstatuschange');
 var app = express();
 
 // view engine setup
