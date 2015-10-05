@@ -151,6 +151,7 @@ var cachefiSchema=new Schema({
 var catalogSchema=new Schema({
     name:String,
     description:String,
+    pic:String,
     path:String,
     skips:Number,
     views:Number,
