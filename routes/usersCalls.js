@@ -30,7 +30,7 @@ var pinTable;
 //});
 /* GET users listing. */
 
-router.post('/create',params({body:['email','password','name','is_operator']},{message : config.get('error.badrequest')}),
+router.post('/create',params({body:['phonenumber']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
         usersLogic.userCreate(req,res)
             .then(function(user){
@@ -42,6 +42,15 @@ router.post('/create',params({body:['email','password','name','is_operator']},{m
                     res.status(err.status).json(err.message);
             }).done();
     },
+    function(req,res,next){
+        usersLogic.pinLogic(req,res)
+            .then(function(response){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
+    },
     function(req, res, next) {
         usersLogic.sendToken(req,res)
             .then(function(response){
@@ -51,7 +60,27 @@ router.post('/create',params({body:['email','password','name','is_operator']},{m
                 res.status(err.status).json(err.message);
             }).done();
     });
-router.post('/signin',params({body:['email','password']},{message : config.get('error.badrequest')}),
+router.post('/protected/verifyPhonenumber',params({body:['phonenumber','pin']},{message : config.get('error.badrequest')}),
+    function(req,res,next) {
+       usersLogic.verifyPhonenumber(req,res)
+           .then(function(response){
+               req.user=response;
+               next();
+           })
+           .catch(function(err){
+               res.status(err.status).json(err.message);
+           }).done();
+    },
+    function(req, res, next) {
+        usersLogic.sendToken(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.post('/signin',params({body:['phonenumber','password']},{message : config.get('error.badrequest')}),
     function(req,res,next){
     usersLogic.signin(req,res)
         .then(function(user){

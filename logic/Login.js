@@ -21,23 +21,23 @@ var pinTable;
     pinTable=db.getpindef;
 
 var users={
-    //pinLogic:function(req,res){
-    //    var def= q.defer();
-    //    var pin=Math.floor(Math.random()*90000) + 10000;
-    //    pinTable.update({phonenumber:req.body.phonenumber},{phonenumber:req.body.phonenumber,pin:pin,used:false},
-    //        {upsert:true}).exec()
-    //        .then(function(info){
-    //            def.resolve(pin);
-    //        }).
-    //        then(null,function(err){
-    //            def.reject({status:500,message:err})
-    //        })
-    //    return def.promise;
-    //},
+    pinLogic:function(req,res){
+        var def= q.defer();
+        var pin=Math.floor(Math.random()*90000) + 10000;
+        pinTable.update({phonenumber:req.body.phonenumber},{phonenumber:req.body.phonenumber,pin:pin,used:false},
+            {upsert:true}).exec()
+            .then(function(info){
+                def.resolve(pin);
+            }).
+            then(null,function(err){
+                def.reject({status:500,message:err})
+            })
+        return def.promise;
+    },
     userCreate:function(req,res){
             var def= q.defer();
             bcrypt.genSalt(10, function(err, salt) {
-                bcrypt.hash(req.body.password, salt, function(err, hash) {
+                bcrypt.hash(randomString(5,'aA#'), salt, function(err, hash) {
                     // Store hash in your password DB.
                     req.body.password=hash;
                     var user = new userTable(req.body);
@@ -46,7 +46,12 @@ var users={
                             def.resolve(user);
                         }else{
                             if(err.code==11000) {
-                                    def.reject({status: 401, message: config.get('error.unauthorized')});
+                                    userTable.findOne({phonenumber:req.body.phonenumber},"phonenumber email name is_verified is_operator is_admin",function(err,user){
+                                        user.is_verified=false;
+                                        user.save(function(err,user,info){
+                                            def.resolve(user);
+                                        })
+                                    })
                             }else{
                                 def.reject({status: 500, message: config.get('error.dberror')});
                             }
@@ -59,7 +64,7 @@ var users={
         },
     signin:function(req,res){
         var def= q.defer();
-        userTable.findOne({email:req.body.email},"password email name").exec()
+        userTable.findOne({phonenumber:req.body.phonenumber},"password email phonenumber name is_verified is_operator is_admin").exec()
             .then(function(user){
                 bcrypt.compare(req.body.password,user.password,function(err,res){
                     if(err){
@@ -76,6 +81,23 @@ var users={
             .then(null,function(err){
                 def.reject({status: 500, message: config.get('error.dberror')});
             });
+        return def.promise;
+    },
+    verifyPhonenumber:function(req,res){
+        var def=new q.defer();
+      pinTable.findOne({phonenumber:req.body.phonenumber,pin:req.body.pin,used:false}).exec()
+          .then(function(pin){
+              if(pin){
+                  userTable.findOne({_id:new ObjectId(req.user._id)},"phonenumber email name is_verified is_operator is_admin",function(err,user) {
+                          def.resolve(user);
+                  });
+              }else{
+                  def.reject({status: 401, message: config.get('error.unauthorized')});
+              }
+          })
+          .then(null,function(err){
+              def.reject({status: 500, message: config.get('error.dberror')});
+          });
         return def.promise;
     },
     renewToken:function(req,res){
@@ -117,5 +139,15 @@ var users={
         return def.promise;
     }
 
+};
+function randomString(length, chars) {
+    var mask = '';
+    if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
+    if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if (chars.indexOf('#') > -1) mask += '0123456789';
+    if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
+    var result = '';
+    for (var i = length; i > 0; --i) result += mask[Math.round(Math.random() * (mask.length - 1))];
+    return result;
 }
 module.exports=users;

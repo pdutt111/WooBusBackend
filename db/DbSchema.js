@@ -38,16 +38,16 @@ mongoose.set('debug', config.get('mongo.debug'));
  * @type {Schema}
  */
 var userSchema=new Schema({
-    email:{type:String,validate:emailValidator,unique:true,dropDups:true,required:true},
-    phonenumber:String,
+    email:String,
+    phonenumber:{type:String,unique:true,dropDups:true,required:true},
     password:{type:String,required:true},
     name:{type:String},
     device:{service:String,reg_id:String,active:{type:Boolean,default:true}},
     contacts:[{phonenumber:{type:String},name:String,_id:false}],
     profession:{type:String},
     url:{type:String},
-    is_operator:Boolean,
-    is_admin:Boolean,
+    is_operator:{type:Boolean,default:false},
+    is_admin:{type:Boolean,default:false},
     address:{type:String},
     is_verified:{type:Boolean,default:false},
     is_service:{type:Boolean,default:false},
