@@ -43,14 +43,28 @@ var users={
                     var user = new userTable(req.body);
                     user.save(function(err,user,info){
                         if(!err){
-                            def.resolve(user);
+                            var tokendata={
+                                _id:user._id,
+                                phonenumber:user.phonenumber,
+                                name:user.name,
+                                is_verified:user.is_verified,
+                                is_operator:user.is_operator,
+                                is_admin:user.is_admin
+
+                            };
+                            def.resolve(tokendata);
                         }else{
                             if(err.code==11000) {
-                                    userTable.findOne({phonenumber:req.body.phonenumber},"phonenumber email name is_verified is_operator is_admin",function(err,user){
-                                        user.is_verified=false;
-                                        user.save(function(err,user,info){
-                                            def.resolve(user);
-                                        })
+                                    userTable.findOne({phonenumber:req.body.phonenumber},"phonenumber name is_verified is_operator is_admin",function(err,user){
+                                        if(!err&&user) {
+                                                user.is_verified = false;
+                                                user.save(function (err, user, info) {
+                                                    def.resolve(user);
+                                                })
+                                        }else{
+                                            console.log(err,user);
+                                            def.reject({status: 500, message: config.get('error.dberror')});
+                                        }
                                     })
                             }else{
                                 def.reject({status: 500, message: config.get('error.dberror')});
@@ -64,7 +78,7 @@ var users={
         },
     signin:function(req,res){
         var def= q.defer();
-        userTable.findOne({phonenumber:req.body.phonenumber},"password email phonenumber name is_verified is_operator is_admin").exec()
+        userTable.findOne({phonenumber:req.body.phonenumber},"password name phonenumber is_verified is_operator is_admin").exec()
             .then(function(user){
                 bcrypt.compare(req.body.password,user.password,function(err,res){
                     if(err){
@@ -88,8 +102,31 @@ var users={
       pinTable.findOne({phonenumber:req.body.phonenumber,pin:req.body.pin,used:false}).exec()
           .then(function(pin){
               if(pin){
-                  userTable.findOne({_id:new ObjectId(req.user._id)},"phonenumber email name is_verified is_operator is_admin",function(err,user) {
-                          def.resolve(user);
+                  userTable.findOne({_id:new ObjectId(req.user._id)},"phonenumber name is_verified is_operator is_admin",function(err,user) {
+                      if(!err&&user) {
+                          pinTable.update({phonenumber:req.body.phonenumber},{$set:{used:true}}).exec()
+                              .then(function(info){
+                                  log.info(info);
+                              })
+                              .then(null,function(err){
+                                  log.warn(err)
+                              })
+                          user.is_verified=true;
+                          user.save(function(err,user,info){
+                              var tokendata={
+                                  _id:user._id,
+                                  phonenumber:user.phonenumber,
+                                  name:user.name,
+                                  is_verified:user.is_verified,
+                                  is_operator:user.is_operator,
+                                  is_admin:user.is_admin
+
+                              };
+                              def.resolve(tokendata);
+                          });
+                      }else{
+                          def.reject({status: 500, message: config.get('error.dberror')});
+                      }
                   });
               }else{
                   def.reject({status: 401, message: config.get('error.unauthorized')});
@@ -136,6 +173,34 @@ var users={
     getstate:function(req,res){
         var def= q.defer();
         def.resolve(config.get('state'));
+        return def.promise;
+    },
+    updateUserProfile:function(req,res){
+        var def= q.defer();
+        console.log(req.user);
+        if(req.user.is_verified){
+            for(var key in req.body){
+                if(key!="name"&&key!="email"&&key!="profession"&&key!="address"){
+                    delete req.body[key];
+                }
+            }
+            userTable.update({_id:new ObjectId(req.user._id)},{$set:req.body}).exec()
+                .then(function(info) {
+                    userTable.findOne({_id:new ObjectId(req.user._id)},"phonenumber name is_verified is_operator is_admin",function(err,user){
+                        if(!err&&user){
+                            def.resolve(user);
+                        }else{
+                            def.reject({status: 500, message: config.get('error.dberror')});
+                        }
+                    })
+                })
+                .then(null,function(err){
+                    console.log(err);
+                    def.reject({status: 500, message: config.get('error.dberror')});
+                })
+        }else{
+            def.reject({status: 401, message: config.get('error.unauthorized')});
+        }
         return def.promise;
     }
 

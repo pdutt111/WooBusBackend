@@ -21,6 +21,13 @@ var emailValidator=[
         message: "not a valid email"
     })
 ];
+var phoneValidator = [
+    validate({
+        validator: 'isLength',
+        arguments: [10, 10],
+        message: 'Name should be between 3 and 50 characters'
+    })
+];
 var db=mongoose.createConnection(config.get('mongo.location'),config.get('mongo.database'));
 var userdef;
 var pindef;
@@ -39,9 +46,9 @@ mongoose.set('debug', config.get('mongo.debug'));
  */
 var userSchema=new Schema({
     email:String,
-    phonenumber:{type:String,unique:true,dropDups:true,required:true},
+    phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true,required:true},
     password:{type:String,required:true},
-    name:{type:String},
+    name:{type:String,validate:nameValidator},
     device:{service:String,reg_id:String,active:{type:Boolean,default:true}},
     contacts:[{phonenumber:{type:String},name:String,_id:false}],
     profession:{type:String},
@@ -51,6 +58,7 @@ var userSchema=new Schema({
     address:{type:String},
     is_verified:{type:Boolean,default:false},
     is_service:{type:Boolean,default:false},
+    is_random_password:{type:Boolean,default:true},
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 });

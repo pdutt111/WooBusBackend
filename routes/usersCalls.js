@@ -35,7 +35,7 @@ router.post('/create',params({body:['phonenumber']},{message : config.get('error
         usersLogic.userCreate(req,res)
             .then(function(user){
                 req.user=user;
-                req.secret=false;
+                req.secret=true;
                 next();
             })
             .catch(function(err){
@@ -72,6 +72,26 @@ router.post('/protected/verifyPhonenumber',params({body:['phonenumber','pin']},{
            }).done();
     },
     function(req, res, next) {
+        usersLogic.sendToken(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    });
+router.post('/protected/updateUserProfile',
+    function(req,res,next) {
+        usersLogic.updateUserProfile(req,res)
+            .then(function(user){
+                req.user=user;
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            }).done();
+    },
+    function(req,res,next){
         usersLogic.sendToken(req,res)
             .then(function(response){
                 res.json(response);
