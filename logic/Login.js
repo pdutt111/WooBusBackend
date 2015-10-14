@@ -62,11 +62,12 @@ var users={
                                                     def.resolve(user);
                                                 })
                                         }else{
-                                            log.warn(err,user);
+                                            log.warn(err);
                                             def.reject({status: 500, message: config.get('error.dberror')});
                                         }
                                     })
                             }else{
+                                log.warn(err);
                                 def.reject({status: 500, message: config.get('error.dberror')});
                             }
                         }
