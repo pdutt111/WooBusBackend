@@ -39,6 +39,7 @@ router.post('/create',params({body:['phonenumber']},{message : config.get('error
                 next();
             })
             .catch(function(err){
+                log.warn(err);
                     res.status(err.status).json(err.message);
             }).done();
     },
@@ -48,8 +49,9 @@ router.post('/create',params({body:['phonenumber']},{message : config.get('error
                 next();
             })
             .catch(function(err){
+                log.warn(err);
                 res.status(err.status).json(err.message);
-            })
+            }).done();
     },
     function(req, res, next) {
         usersLogic.sendToken(req,res)
@@ -57,6 +59,7 @@ router.post('/create',params({body:['phonenumber']},{message : config.get('error
                 res.json(response);
             })
             .catch(function(err){
+                log.warn(err);
                 res.status(err.status).json(err.message);
             }).done();
     });
