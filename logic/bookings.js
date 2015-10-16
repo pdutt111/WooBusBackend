@@ -56,7 +56,13 @@ var bookings={
     },
     getBuses:function(req,res){
         var def= q.defer();
-        busTable.find({route:req.route,in_booking:true,departure_time:{$gt:new Date()}},"fare discounts " +
+        var lowDate=new Date(req.query.date);
+        lowDate.setHours(0,0,0,0);
+        var highDate=new Date(req.query.date);
+        highDate.setHours(0,0,0,0);
+        highDate.setUTCDate(highDate.getUTCDate()+1);
+        log.info(lowDate.toUTCString(),highDate.toUTCString());
+        busTable.find({route:req.route,in_booking:true,departure_time:{$gt:lowDate,$lt:highDate}},"fare discounts " +
             "discounted_price departure_time" +
             " arrival_time boarding_points total_seats " +
             "images media_loaded distance route seats bus_identifier")
@@ -92,42 +98,76 @@ var bookings={
     bookbus: {
         bookingsTableEntry: function (req, res) {
             var def = q.defer();
-            var booking = new bookingsTable({
-                user_id: req.user._id,
-                bus_id: req.body.bus_id,
-                amount: req.body.amount,
-                seat_no: req.body.seat_no
-            });
-            booking.save(function (err, booking, info) {
-                if (!err) {
-                    def.resolve(booking);
-                } else {
-                    def.reject({status: 500, message: config.get('error.dberror')});
-                }
-            });
-
+                busTable.findOne({_id: new ObjectId(req.body.bus_id)}, "fare", function (err, bus) {
+                    var seats
+                    if(!req.body.seat_no instanceof Array) {
+                        seats=[req.body.seat_no];
+                    }else{
+                        seats=req.body.seat_no;
+                    }
+                    req.body.seat_no=seats;
+                        bookingsTable.find({bus_id:new ObjectId(req.body.bus_id),seat_no:{$in:seats},is_deleted:false},"_id",function(err,buses){
+                            if(!err&&!booking) {
+                                var booking = new bookingsTable({
+                                    user_id: new ObjectId(req.user._id),
+                                    bus_id: new ObjectId(req.body.bus_id),
+                                    amount: bus.fare,
+                                    seat_no: seats
+                                });
+                                booking.save(function (err, booking, info) {
+                                    if (!err) {
+                                        def.resolve(booking);
+                                    } else {
+                                        def.reject({status: 500, message: config.get('error.dberror')});
+                                    }
+                                });
+                            }
+                        });
+                });
             return def.promise;
         },
         busTableEntry: function (req, res) {
             var def = q.defer();
-            busTable.update({_id: new ObjectId(req.body.bus_id), 'seats.seat_no': req.body.seat_no},
-                {$set: {'seats.$.is_booked': true, 'seats.$.booking_id': req.booking._id}}, function (err, info) {
+            async.each(req.body.seat_no,function(val,callback){
+                busTable.update({_id: new ObjectId(req.body.bus_id), 'seats.seat_no': val},
+                    {$set: {'seats.$.is_booked': true, 'seats.$.booking_id': req.booking._id}}, function (err, info) {
+                        callback(err);
+                    });
+            },function(err){
+                if (!err) {
+                    def.resolve(config.get('ok'));
+                } else {
+                    def.reject({status: 500, message: config.get('error.dberror')});
+                }
+            });
+            return def.promise;
+        },
+        bookingsTableConfirm: function (req, res) {
+            var def = q.defer();
+            bookingsTable.update({_id: new ObjectId(req.body._id)}, {$set: {is_confirmed: true}}, function (err, info) {
+                if (!err) {
+                    def.resolve(req.booking);
+                } else {
+                    def.reject({status: 500, message: config.get('error.dberror')});
+                }
+            });
+            return def.promise;
+        },
+        bookingsTableReject: function (req, res) {
+            var def = q.defer();
+            bookingsTable.remove({_id: new ObjectId(req.body._id)}, {$set: {is_confirmed: true}}, function (err, info) {
+                async.each(req.body.seat_no,function(val,callback){
+                    busTable.update({_id: new ObjectId(req.body.bus_id), 'seats.seat_no': val},
+                        {$set: {'seats.$.is_booked': false },$unset:{'seats.$.booking_id':""}}, function (err, info) {
+                            callback(err);
+                        });
+                },function(err){
                     if (!err) {
                         def.resolve(config.get('ok'));
                     } else {
                         def.reject({status: 500, message: config.get('error.dberror')});
                     }
                 });
-            return def.promise;
-        },
-        bookingsTableConfirm: function (req, res) {
-            var def = q.defer();
-            bookingsTable.update({_id: new ObjectId(req.booking._id)}, {$set: {is_confirmed: true}}, function (err, info) {
-                if (!err) {
-                    def.resolve(req.booking);
-                } else {
-                    def.reject({status: 500, message: config.get('error.dberror')});
-                }
             });
             return def.promise;
         }

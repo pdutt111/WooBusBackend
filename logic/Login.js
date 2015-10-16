@@ -103,7 +103,7 @@ var users={
       pinTable.findOne({phonenumber:req.body.phonenumber,pin:req.body.pin,used:false}).exec()
           .then(function(pin){
               if(pin){
-                  userTable.findOne({_id:new ObjectId(req.user._id)},"phonenumber name is_verified is_operator is_admin",function(err,user) {
+                  userTable.findOne({phonenumber:req.body.phonenumber},"phonenumber name is_verified is_operator is_admin",function(err,user) {
                       if(!err&&user) {
                           pinTable.update({phonenumber:req.body.phonenumber},{$set:{used:true}}).exec()
                               .then(function(info){
@@ -126,7 +126,7 @@ var users={
                               def.resolve(tokendata);
                           });
                       }else{
-                          def.reject({status: 500, message: config.get('error.dberror')});
+                          def.reject({status: 404, message: config.get('error.notfound')});
                       }
                   });
               }else{
@@ -148,6 +148,7 @@ var users={
         return def.promise;
     },
     sendToken:function(req,res){
+        log.info(req.secret);
         var def= q.defer();
         delete req.user.is_operator;
         delete req.user.password;

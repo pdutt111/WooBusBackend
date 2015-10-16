@@ -26,7 +26,7 @@ router.get('/protected/autocomplete',params({query:['q'],headers:['authorization
             res.status(err.status).json(err.message);
           })
     });
-router.get('/protected/buses',params({query:['start','end'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/protected/buses',params({query:['start','end','date'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         bookinglogic.getRoute(req,res)
             .then(function(route){
@@ -56,9 +56,9 @@ router.get('/protected/bus/:id',params({headers:['authorization']},{message : co
                 res.status(err.status).json(err.message);
             })
     });
-router.post('/protected/book',params({body:['bus_id','amount','seat_no'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.post('/protected/book',params({body:['bus_id'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
-        console.log(req.user);
+        console.log(req.body);
       bookinglogic.bookbus.bookingsTableEntry(req,res)
           .then(function(booking){
             req.booking=booking;
@@ -71,20 +71,32 @@ router.post('/protected/book',params({body:['bus_id','amount','seat_no'],headers
     function(req,res,next){
       bookinglogic.bookbus.busTableEntry(req,res)
           .then(function(result){
-            next();
+              res.json(result);
           })
           .catch(function(err){
             res.status(err.status).json(err.message);
           })
+    });
+router.post('/protected/book/confirm',params({body:['_id'],headers:['authorization']},{message : config.get('error.badrequest')}),
+    function(req,res,next){
+        console.log(req.user);
+        bookinglogic.bookbus.bookingsTableEntry(req,res)
+            .then(function(booking){
+                req.booking=booking;
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
     },
-    function(req,res){
-      bookinglogic.bookbus.bookingsTableConfirm(req,res)
-          .then(function(result){
-            res.json(req.booking);
-          })
-          .catch(function(err){
-            res.status(err.status).json(err.message);
-          });
+    function(req,res,next){
+        bookinglogic.bookbus.busTableEntry(req,res)
+            .then(function(result){
+                next();
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            })
     });
 
 module.exports = router;

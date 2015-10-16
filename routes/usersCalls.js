@@ -31,47 +31,40 @@ var pinTable;
 /* GET users listing. */
 
 router.post('/create',params({body:['phonenumber']},{message : config.get('error.badrequest')}),
-    function(req,res,next) {
-        usersLogic.userCreate(req,res)
-            .then(function(user){
-                req.user=user;
-                req.secret=true;
-                next();
-            })
-            .catch(function(err){
-                log.warn(err);
-                    res.status(err.status).json(err.message);
-            }).done();
-    },
     function(req,res,next){
         usersLogic.pinLogic(req,res)
             .then(function(response){
-                next();
-            })
-            .catch(function(err){
-                log.warn(err);
-                res.status(err.status).json(err.message);
-            }).done();
-    },
-    function(req, res, next) {
-        usersLogic.sendToken(req,res)
-            .then(function(response){
-                res.json(response);
+                res.json({pin:response});
             })
             .catch(function(err){
                 log.warn(err);
                 res.status(err.status).json(err.message);
             }).done();
     });
-router.post('/protected/verifyPhonenumber',params({body:['phonenumber','pin']},{message : config.get('error.badrequest')}),
+router.post('/verifyPhonenumber',params({body:['phonenumber','pin']},{message : config.get('error.badrequest')}),
     function(req,res,next) {
        usersLogic.verifyPhonenumber(req,res)
            .then(function(response){
                req.user=response;
+               req.secret=true;
                next();
            })
            .catch(function(err){
-               res.status(err.status).json(err.message);
+               if(err.status==404){
+                   usersLogic.userCreate(req,res)
+                       .then(function(user){
+                           req.user=user;
+                           req.secret=true;
+                           next();
+                       })
+                       .catch(function(err){
+                           log.warn(err);
+                           res.status(err.status).json(err.message);
+                       }).done();
+               }else{
+                   res.status(err.status).json(err.message);
+               }
+
            }).done();
     },
     function(req, res, next) {
@@ -153,6 +146,7 @@ router.get('/protected/info',params({headers:['authorization']},{message : confi
 });
 router.get('/protected/state',params({headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
+        log.info("fetching state");
         usersLogic.getstate(req,res)
             .then(function(state){
                 res.json(state);

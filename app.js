@@ -14,6 +14,7 @@ var operators = require('./routes/operatorCalls');
 var box = require('./routes/syncOperations');
 var admin = require('./routes/adminCalls');
 require('./jobs/busstatuschange');
+require('./jobs/refreshUnbookedSeats');
 var app = express();
 
 // view engine setup
@@ -32,7 +33,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 /**
  * middleware to authenticate the jwt and routes
  */
+app.use(function (req, res, next) {
 
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, content-type, user-agent, connection, host, referer, accept-encoding, accept-language');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+app.use(function(req,res,next){
+    //log.info(req.headers,req.method);
+    if(req.method=="OPTIONS"){
+        res.end();
+    }else{
+        next();
+    }
+})
 app.use(
     function(req,res,next){
       auth(req,res)
@@ -54,24 +80,7 @@ app.use(
             res.status(err.status).json(err.message);
           });
     });
-app.use(function (req, res, next) {
 
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', '*');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-
-    // Pass to next layer of middleware
-    next();
-});
 /**
  * routes
  */

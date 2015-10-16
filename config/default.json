@@ -13,6 +13,7 @@
     "debug": false
   },
   "state":{
+    "in_bus":true,
     "bookings":true,
     "entertainment":false,
     "ebooks":false,

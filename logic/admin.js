@@ -23,6 +23,7 @@ var crypto=require('../authentication/crypto');
 var userTable=db.getuserdef;
 var busTable=db.getbusdef;
 var routesTable=db.getroutesdef;
+var cityTable=db.getcitiesdef;
 
 var functions={
     verifyAdmin:function(req,res){
@@ -178,6 +179,12 @@ var functions={
     },
     addRoutes:function(req,res){
         var def= q.defer();
+        if(req.body.start&&req.body.end){
+            var city1=new cityTable({name:req.body.start});
+            city1.save(function(err,city,info){})
+            var city2=new cityTable({name:req.body.end});
+            city2.save(function(err,city,info){})
+        }
        var route=new routesTable(req.body);
         route.save(function(err,route,info){
             if(!err){

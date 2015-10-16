@@ -46,7 +46,7 @@ mongoose.set('debug', config.get('mongo.debug'));
  */
 var userSchema=new Schema({
     email:String,
-    phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true,required:true},
+    phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true},
     password:{type:String,required:true},
     name:{type:String,validate:nameValidator},
     device:{service:String,reg_id:String,active:{type:Boolean,default:true}},
@@ -139,15 +139,15 @@ var bookingschema=new Schema({
     bus_id:{type:Schema.ObjectId,ref:'buses'},
     amount:Number,
     is_confirmed:{type:Boolean,default:false},
-    seat_no:Number,
+    seat_no:[Number],
     feedback:String,
+    is_deleted:{type:Boolean,default:false},
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 });
 var citiesSchema=new Schema({
     name:{type:String,index:true},
     location:{type:[Number], index:"2dsphere"},
-    operators:{name:String,buses:String}
 });
 var cachefiSchema=new Schema({
     bus_identifier:{type:String,unique:true,index:true,dropDups:true},
@@ -166,7 +166,6 @@ var catalogSchema=new Schema({
     language:String,
     content_type:String
 })
-bookingschema.index({bus_id:1,seat_no:1},{unique:true});
 routesSchema.index({start:1,end:1},{unique:true});
 db.on('error', function(err){
     log.info(err);
