@@ -68,10 +68,8 @@ var bookings={
     getBuses:function(req,res){
         var def= q.defer();
         var lowDate=new Date(req.query.date);
-        lowDate.setHours(0,0,0,0);
         var highDate=new Date(req.query.date);
-        highDate.setHours(0,0,0,0);
-        highDate.setUTCDate(highDate.getUTCDate()+1);
+        highDate.setDate(highDate.getDate()+1);
         log.info(lowDate.toUTCString(),highDate.toUTCString());
         busTable.find({route:req.route,in_booking:true,departure_time:{$gte:lowDate,$lte:highDate}},"fare discounts " +
             "discounted_price departure_time" +
