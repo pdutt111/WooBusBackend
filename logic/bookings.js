@@ -23,11 +23,17 @@ var routeTable=db.getroutesdef;;
 var bookings={
     cityAutoSuggest:function(req,res){
         var def= q.defer();
-        if(typeof req.query.q == "string" && req.query.q.length>3) {
+        log.info(req.query);
+        if(req.query.q.length>=3) {
             var re = new RegExp(req.query.q, 'i');
             cityTable.find({name: {$regex: re}}, "name -_id", function (err,docs) {
                 if(!err) {
-                    def.resolve(docs);
+                    var cities=[];
+                    for(var count in docs){
+                           cities.push(docs[count].name);
+                    }
+                    log.warn(cities);
+                    def.resolve(cities);
                 }else{
                     def.reject({status:500,message:config.get('error.dberror')});
                 }
@@ -52,6 +58,11 @@ var bookings={
             }
 
         });
+        return def.promise;
+    },
+    getCities:function(req,res){
+        var def= q.defer();
+        def.resolve(config.get('cities'));
         return def.promise;
     },
     getBuses:function(req,res){

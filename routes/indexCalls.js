@@ -26,6 +26,15 @@ router.get('/protected/autocomplete',params({query:['q'],headers:['authorization
             res.status(err.status).json(err.message);
           })
     });
+router.get('/cities',function(req,res){
+    bookinglogic.getCities(req,res)
+        .then(function(cities){
+            res.json(cities);
+        })
+        .catch(function(err){
+            res.status(err.status).json(err.message);
+        }).done()
+})
 router.get('/protected/buses',params({query:['start','end','date'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         bookinglogic.getRoute(req,res)

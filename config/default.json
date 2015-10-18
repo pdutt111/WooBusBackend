@@ -13,12 +13,24 @@
     "debug": false
   },
   "state":{
-    "in_bus":true,
+    "in_bus":false,
     "bookings":true,
     "entertainment":false,
     "ebooks":false,
     "apps":true
   },
+  "cities":[
+    "delhi",
+    "mumbai",
+    "pune",
+    "agra",
+    "shimla",
+    "manali",
+    "bangalore",
+    "hyderabad",
+    "indore",
+    "bhopal"
+  ],
   "token":{
     "expiry":25
   },
