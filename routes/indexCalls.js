@@ -35,7 +35,7 @@ router.get('/cities',function(req,res){
             res.status(err.status).json(err.message);
         }).done()
 })
-router.get('/protected/buses',params({query:['start','end','date'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/buses',params({query:['start','end','date'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         bookinglogic.getRoute(req,res)
             .then(function(route){
@@ -55,7 +55,7 @@ router.get('/protected/buses',params({query:['start','end','date'],headers:['aut
             res.status(err.status).json(err.message);
           })
     });
-router.get('/protected/bus/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/bus/:id',params({headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         bookinglogic.getBus(req,res)
             .then(function(cities){
