@@ -19,7 +19,7 @@ var auth=function(req,res,next){
                     if ((now < decoded.exp)) {
                         def.resolve(decoded.user);
                     }else{
-                        if(req.originalUrl.indexOf("/protected/renew")>-1){
+                        if(req.originalUrl.indexOf("/protected/info/renew")>-1){
                             def.resolve(decoded.user);
                         }
                         else {
