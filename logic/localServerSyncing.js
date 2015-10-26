@@ -99,12 +99,13 @@ var syncing={
     },
     getRoute:function(req,res){
         var def= q.defer();
-        busTable.findOne({_id:new ObjectId(req.params.id),is_completed:false},"start end fare discounts departure_time " +
-            " distance images boarding_points total_seats discounted_price route bus_type seats in_transit in_booking is_completed")
+        busTable.findOne({bus_identifier:req.query.bus_identifier,in_booking:false,is_completed:false,is_deleted:false}
+            ,"start end fare discounts departure_time " +
+            " distance images total_seats discounted_price route bus_type seats in_transit in_booking is_completed")
             .populate("route","start end fare distance time_taken active scheduled_stops boarding_points")
             .exec()
-            .then(function(buses){
-                def.resolve(buses[0]);
+            .then(function(bus){
+                def.resolve(bus);
             })
             .then(null,function(err){
                 def.reject({status:500,message:config.get('error.dberror')});

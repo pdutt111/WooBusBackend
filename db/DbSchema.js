@@ -91,6 +91,8 @@ var busschema=new Schema({
 var routesSchema=new Schema({
     start:{type:String,index:true},
     end:{type:String,index:true},
+    start_loc:{type:[Number],index:"2dsphere"},
+    end_loc:{type:[Number],index:"2dsphere"},
     boarding_points:[{
         point:String,
         location:{type:[Number],index:"2dsphere"},

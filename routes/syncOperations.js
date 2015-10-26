@@ -74,13 +74,14 @@ router.post('/journey/completed',params({body:['bus_identifier','id']},{message 
     function(req,res,next){
         sync.journeyCompleted(req,res)
             .then(function(response){
-                next();
+                res.json(config.get("ok"));
             })
             .catch(function(err){
                 res.status(err.status).json(err.message);
             })
-    },
-    function(req,res,next){
+    });
+router.get('/route/get',params({query:['bus_identifier']},{message : config.get('error.badrequest')}),
+    function(req,res){
         sync.getRoute(req,res)
             .then(function(response){
                 res.json(response);
@@ -88,5 +89,6 @@ router.post('/journey/completed',params({body:['bus_identifier','id']},{message 
             .catch(function(err){
                 res.status(err.status).json(err.message);
             })
-    });
+    }
+)
 module.exports = router;
