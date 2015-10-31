@@ -144,7 +144,7 @@ router.get('/protected/info',params({headers:['authorization']},{message : confi
     delete req.user._id;
     res.json(req.user);
 });
-router.get('/protected/state',params({headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/state',params({headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         log.info("fetching state");
         usersLogic.getstate(req,res)
