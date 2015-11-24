@@ -46,12 +46,11 @@ var bookings={
     getRoute:function(req,res){
         var def= q.defer();
         routeTable.findOne({start:req.query.start,end:req.query.end},"_id",function(err,route){
-            console.log(err,route);
             if(!err){
                 if(route) {
                     def.resolve(route);
                 }else{
-                    def.reject({status:200,message:config.get("error.noroute")});
+                    def.reject([]);
                 }
             }else{
                 def.reject({status:500,message:config.get('error.dberror')});

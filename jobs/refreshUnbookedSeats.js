@@ -23,7 +23,6 @@ var bookingTable=db.getbookingsdef;
 var busTable=db.getbusdef;
 var job = new CronJob({
     onTick: function() {
-        log.info("cleaning in progess");
       bookingTable.find({is_confirmed:false,is_deleted:false,created_time:{$lte:moment().subtract(5, 'minutes')}},function(err,bookings){
           async.each(bookings,function(bus,callback){
               bookingTable.update({_id:new ObjectId(bus._id)},{$set:{is_deleted:true}},function(err,info){

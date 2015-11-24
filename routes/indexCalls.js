@@ -15,7 +15,7 @@ var bookinglogic=require('../logic/bookings');
 var userTable=db.getuserdef;
 
 
-router.get('/protected/autocomplete',params({query:['q'],headers:['authorization']},{message : config.get('error.badrequest')}),
+router.get('/autocomplete',params({query:['q'],headers:['authorization']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         console.log(req.user);
       bookinglogic.cityAutoSuggest(req,res)
