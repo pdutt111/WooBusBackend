@@ -40,6 +40,7 @@ router.get('/buses',params({query:['start','end','date']},{message : config.get(
         bookinglogic.getRoute(req,res)
             .then(function(route){
                 req.route=route._id;
+                log.info(req.route);
                 next();
             })
             .catch(function(err){
