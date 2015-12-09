@@ -25,7 +25,7 @@ var phoneValidator = [
     validate({
         validator: 'isLength',
         arguments: [10, 10],
-        message: 'Name should be between 3 and 50 characters'
+        message: 'phonenumber should be 10 digits'
     })
 ];
 var db=mongoose.createConnection(config.get('mongo.location'),config.get('mongo.database'));
@@ -48,7 +48,7 @@ var userSchema=new Schema({
     email:String,
     phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true},
     password:{type:String,required:true},
-    name:{type:String,validate:nameValidator},
+    name:{type:String},
     device:{service:String,reg_id:String,active:{type:Boolean,default:true}},
     contacts:[{phonenumber:{type:String},name:String,_id:false}],
     profession:{type:String},

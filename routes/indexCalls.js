@@ -49,8 +49,8 @@ router.get('/buses',params({query:['start','end','date']},{message : config.get(
     },
     function(req,res,next){
       bookinglogic.getBuses(req,res)
-          .then(function(cities){
-            res.json(cities);
+          .then(function(buses){
+            res.json(buses);
           })
           .catch(function(err){
             res.status(err.status).json(err.message);
