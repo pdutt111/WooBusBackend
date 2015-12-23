@@ -38,6 +38,8 @@ var citiesdef;
 var bookingsdef;
 var catalogdef;
 var buslocationdef;
+var auditsdef;
+var questionsdef;
 var Schema = mongoose.Schema;
 mongoose.set('debug', config.get('mongo.debug'));
 /**
@@ -136,6 +138,40 @@ var buslocationschema=new Schema({
     created_time:{type:Date,default:Date.now},
     modified_time:{type:Date,default:Date.now}
 })
+/**
+ *  audit schema stores all the things checked during an audit in the bus and the bus id
+ */
+var auditschema=new Schema({
+    bus_id:{type:Schema.ObjectId, ref:'buses'},
+    bus_identifier:String,
+    location:{type:[Number], index:"2dsphere"},
+    cleanliness:Number,
+    volvo_driver:Boolean,
+    phone_holder:Boolean,
+    phone:Boolean,
+    uniform:Boolean,
+    first_aid:Boolean,
+    pushback_lever:{all:Boolean, info:String},
+    legrest_lever:{all:Boolean, info:String},
+    ac_vent:{all:Boolean, info:String},
+    powersocket:{all:Boolean, info:String},
+    accessory_bag:{all:Boolean, info:String},
+    blankets:{all:Boolean, info:String},
+    headrest_cover:{all:Boolean, info:String},
+    reading_lamp:{all:Boolean, info:String},
+    audit_time:{type:Date,default:Date.now()},
+    created_time:{type:Date,default:Date.now},
+    modified_time:{type:Date,default:Date.now}
+});
+/**
+ *  questions schema stores the questions corresponding to the things checked during an audit
+ *  for the auditor application
+ */
+var questionschema=new Schema({
+    question:String,
+    q_type:String,
+    name:String
+});
 var bookingschema=new Schema({
     user_id:{type:Schema.ObjectId,ref:'user'},
     bus_id:{type:Schema.ObjectId,ref:'buses'},
@@ -149,7 +185,7 @@ var bookingschema=new Schema({
 });
 var citiesSchema=new Schema({
     name:{type:String,index:true},
-    location:{type:[Number], index:"2dsphere"},
+    location:{type:[Number], index:"2dsphere"}
 });
 var cachefiSchema=new Schema({
     bus_identifier:{type:String,unique:true,index:true,dropDups:true},
@@ -185,6 +221,8 @@ db.on('error', function(err){
     citiesdef=db.model('cities',citiesSchema);
     routesdef=db.model('routes',routesSchema);
     catalogdef=db.model('catalog',catalogSchema);
+    auditsdef=db.model('audits',auditschema);
+    questionsdef=db.model('questions',questionschema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
@@ -195,5 +233,7 @@ db.on('error', function(err){
     exports.getcatalogdef= catalogdef;
     exports.getbuslocationdef= buslocationdef;
     exports.getroutesdef= routesdef;
+    exports.getauditsdef=auditsdef;
+    exports.getquestionsdef=questionsdef;
     events.emitter.emit("db_data");
 
