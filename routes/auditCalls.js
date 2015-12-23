@@ -39,7 +39,7 @@ router.post('/add',
 );
 
 router.get('/protected/audits',
-    params({headers:['authorization']}, {body:['']}, {message: config.get('error.badrequest')})),
+    params({headers:['authorization']}, {body:['']}, {message: config.get('error.badrequest')}),
     function(req, res, next) {
         adminLogic.verifyAdmin(req, res)
             .then(function () {
