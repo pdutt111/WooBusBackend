@@ -57,7 +57,7 @@ router.get('/protected/audits',
             })
             .catch(function (err) {
                 res.status(err.status).json(err.message);
-            }).done().
+            }).done()
     }
 )
 router.post('/protected/questions',
