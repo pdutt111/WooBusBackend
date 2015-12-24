@@ -14,8 +14,10 @@ var log = require('tracer').colorConsole(config.get('log'));
 var auditLogic=require('../logic/audits');
 var adminLogic=require('../logic/admin');
 
+//, 'location', 'audit_time', 'volvo_driver', 'uniform', 'phone', 'first_aid', 'cleanliness', 'pushback_lever', 'legrest_lever', 'ac_vent', 'powersocket', 'phone_holder', 'accessory_bag', 'blankets', 'headrest_cover', 'reading_lamp'
+
 router.post('/add',
-    params({body:['bus_identifier', 'location', 'audit_time', 'volvo_driver', 'uniform', 'phone', 'first_aid', 'cleanliness', 'pushback_lever', 'legrest_lever', 'ac_vent', 'powersocket', 'phone_holder', 'accessory_bag', 'blankets', 'headrest_cover', 'reading_lamp' ]}, {message: config.get('error.badrequest')}),
+    params({body:['bus_identifier']}, {message: config.get('error.badrequest')}),
     function(req, res, next) {
         auditLogic.identifyBus(req, res)
             .then(function(response){
@@ -24,24 +26,25 @@ router.post('/add',
             })
             .catch(function(err){
                 res.status(err.status).json(err.message);
-            }).done();
+            })
+            .done();
     },
-    function(req,res){
+    function(req, res) {
         auditLogic.addAudit(req, res)
             .then(function(response){
                 res.json(response);
-                next();
             })
             .catch(function(err){
                 res.status(err.status).json(err.message);
-            }).done();
+            })
+            .done();
     }
 );
 
 router.get('/protected/audits',
-    params({headers:['authorization']}, {body:['']}, {message: config.get('error.badrequest')}),
+    params({headers:['authorization']}, {message: config.get('error.badrequest')}),
     function(req, res, next) {
-        adminLogic.verifyAdmin(req, res)
+        adminLogic.verifyAdmin(req, res, next)
             .then(function () {
                 next();
             })
@@ -50,10 +53,9 @@ router.get('/protected/audits',
             }).done();
     },
     function(req, res, next) {
-        auditLogic.getAudits(req, res)
+        auditLogic.getAudits(req, res, next)
             .then(function(response) {
                 res.json(response);
-                next();
             })
             .catch(function (err) {
                 res.status(err.status).json(err.message);
@@ -63,7 +65,7 @@ router.get('/protected/audits',
 router.post('/protected/questions',
     params({body:['questions']}, {message: config.get('error.badrequest')}),
     function(req, res, next) {
-        adminLogic.verifyAdmin(req, res)
+        adminLogic.verifyAdmin(req, res, next)
             .then(function () {
                 next();
             })
@@ -75,7 +77,6 @@ router.post('/protected/questions',
         auditLogic.addQuestions(req, res)
             .then(function(response) {
                 res.json(response);
-                next();
             })
             .catch(function(err) {
                 res.status(err.status).json(err.message);
@@ -88,7 +89,6 @@ router.get('/questions',
         auditLogic.getQuestions(req, res)
             .then(function(response) {
                 res.json(response);
-                next();
             })
             .catch(function(err) {
                 res.status(err.status).json(err.message);

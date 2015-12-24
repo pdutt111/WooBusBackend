@@ -15,11 +15,12 @@ var audits = {
     identifyBus:function(req, res) {
         var def = q.defer();
         busTable.findOne({bus_identifier:req.body.bus_identifier}, "_id",function(err,bus){
-            if(!err){
+            if(!err && bus != null)
                 def.resolve(bus);
-            }else{
-                def.reject({status:500, message:config.get('error.dberror')})
-            }
+            else if (bus == null)
+                def.reject({status:400, message:config.get('error.badrequest')});
+            else
+                def.reject({status: 500, message: config.get('error.dberror')});
         });
         return def.promise;
     },
