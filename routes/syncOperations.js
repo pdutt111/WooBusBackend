@@ -89,6 +89,16 @@ router.get('/route/get',params({query:['bus_identifier']},{message : config.get(
             .catch(function(err){
                 res.status(err.status).json(err.message);
             })
-    }
-)
+    });
+router.post('/users',params({body:['bus_identifier','users']},{message : config.get('error.badrequest')}),
+    function(req,res){
+        log.info(req.body);
+        sync.syncUsers(req,res)
+            .then(function(response){
+                res.json(response);
+            })
+            .catch(function(err){
+                res.status(err.status).json(err.message);
+            });
+    });
 module.exports = router;

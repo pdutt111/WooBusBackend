@@ -111,6 +111,16 @@ var syncing={
                 def.reject({status:500,message:config.get('error.dberror')});
             })
         return def.promise;
+    },
+    syncUsers:function(req,res){
+        var def= q.defer();
+        def.resolve(config.get("ok"));
+        try{
+            userTable.collection.insert(req.body.users, {continueOnError:true}, function(err,info){
+                log.warn(err);
+            })
+        }catch(e){}
+        return def.promise;
     }
 };
 

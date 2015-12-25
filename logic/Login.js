@@ -57,8 +57,9 @@ var users={
                             if(err.code==11000) {
                                     userTable.findOne({phonenumber:req.body.phonenumber},"phonenumber name is_verified is_operator is_admin",function(err,user){
                                         if(!err&&user) {
-                                                user.is_verified = false;
-                                                user.save(function (err, user, info) {
+
+                                            user.is_verified = false;
+                                            user.save(function (err, user, info) {
                                                     def.resolve(user);
                                                 })
                                         }else{
