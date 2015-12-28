@@ -101,4 +101,15 @@ router.post('/users',params({body:['bus_identifier','users']},{message : config.
                 res.status(err.status).json(err.message);
             });
     });
+router.post('/feedback',
+    function(req,res,next){
+        sync.sendFeedback(req,res)
+            .then(function(){
+                res.json(config.get('ok'))
+            }).catch(function(err){
+                log.error(err);
+                res.status(500).json(config.get('error.dberror'));
+            });
+        res.json(req.user);
+    });
 module.exports = router;

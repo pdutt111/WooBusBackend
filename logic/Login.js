@@ -19,6 +19,7 @@ var userTable;
 var pinTable;
     userTable=db.getuserdef;
     pinTable=db.getpindef;
+var feedbackTable=db.getfeedbackdef;
 
 var users={
     pinLogic:function(req,res){

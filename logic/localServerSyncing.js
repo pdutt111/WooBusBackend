@@ -20,6 +20,7 @@ var busLocationTable=db.getbuslocationdef;
 var cachefiTable=db.getcachefidef;
 var catalogTable=db.getcatalogdef;
 var busLocationTable=db.getbuslocationdef;
+var feedbackTable=db.getfeedbackdef;
 
 var syncing={
     boxinit:function(req,res){
@@ -120,6 +121,19 @@ var syncing={
                 log.warn(err);
             })
         }catch(e){}
+        return def.promise;
+    },
+    sendFeedback:function(req,res){
+        var def= q.defer();
+        feedbackTable.collection.insert(req.body.feedbacks, function(err, rows) {
+            if(!err) {
+                def.resolve();
+            }
+            else {
+                def.reject({status: 500, message: config.get('error.dberror')});
+            }
+        });
+        def.resolve(config.get('state'));
         return def.promise;
     }
 };
