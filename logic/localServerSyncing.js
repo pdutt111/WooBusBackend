@@ -125,8 +125,8 @@ var syncing={
     },
     sendFeedback:function(req,res){
         var def= q.defer();
-        feedbackTable.collection.insert(req.body.feedbacks, function(err, rows) {
-            if(!err) {
+        feedbackTable.collection.insert(req.body.feedbacks, {continueOnError:true}, function(err, rows) {
+            if(!err||err.code==11000) {
                 def.resolve();
             }
             else {
