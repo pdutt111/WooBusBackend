@@ -133,7 +133,6 @@ var syncing={
                 def.reject({status: 500, message: config.get('error.dberror')});
             }
         });
-        def.resolve(config.get('state'));
         return def.promise;
     }
 };

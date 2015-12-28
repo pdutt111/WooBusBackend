@@ -101,7 +101,7 @@ router.post('/users',params({body:['bus_identifier','users']},{message : config.
                 res.status(err.status).json(err.message);
             });
     });
-router.post('/feedback',
+router.post('/feedback',params({body:['bus_identifier','feedbacks']},{message : config.get('error.badrequest')}),
     function(req,res,next){
         sync.sendFeedback(req,res)
             .then(function(){
@@ -110,6 +110,5 @@ router.post('/feedback',
                 log.error(err);
                 res.status(500).json(config.get('error.dberror'));
             });
-        res.json(req.user);
     });
 module.exports = router;
