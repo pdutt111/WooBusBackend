@@ -100,9 +100,10 @@ var syncing={
     },
     getRoute:function(req,res){
         var def= q.defer();
-        busTable.find({bus_identifier:req.query.bus_identifier,in_booking:false,is_completed:false,is_deleted:false}
+        busTable.findOne({bus_identifier:req.query.bus_identifier,in_booking:false,is_completed:false,is_deleted:false}
             ,"start end fare discounts departure_time " +
             " distance images total_seats discounted_price route bus_type seats in_transit in_booking is_completed")
+            .sort({_id:-1})
             .populate("route","start end start_loc end_loc fare distance time_taken active scheduled_stops boarding_points")
             .exec()
             .then(function(bus){
