@@ -40,10 +40,10 @@
   },
   "gcmServerKey":"",
   "error": {
-  "noroute":{
-    "result":"error",
-    "description":"no such route"
-  },
+    "noroute":{
+      "result":"error",
+      "description":"no such route"
+    },
     "exists": {
       "result": "error",
       "description": "duplicate entry"

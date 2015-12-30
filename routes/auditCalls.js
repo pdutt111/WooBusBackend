@@ -63,7 +63,7 @@ router.get('/protected/audits',
     }
 )
 router.post('/protected/questions',
-    params({body:['questions']}, {message: config.get('error.badrequest')}),
+    params({body:['questions', 'q_type', 'name']}, {message: config.get('error.badrequest')}),
     function(req, res, next) {
         adminLogic.verifyAdmin(req, res, next)
             .then(function () {
