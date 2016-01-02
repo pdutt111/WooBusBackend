@@ -25,7 +25,7 @@ var job = new CronJob({
         busTable.update({departure_time:{$lte:moment().add(3, 'hours')}},{$set:{in_booking:false}},
             {multi:true},function(err,info){
         });
-        busTable.update({departure_time:{$lte:moment().subtract(15, 'hours')}},{$set:{in_transit:false}},
+        busTable.update({departure_time:{$lte:moment().subtract(15, 'hours')}},{$set:{in_transit:false,is_deleted:false}},
             {multi:true},function(err,info){
             });
     },
