@@ -118,22 +118,30 @@ var syncing={
         var def= q.defer();
         def.resolve(config.get("ok"));
         try{
-            userTable.collection.insert(req.body.users, {continueOnError: true, safe: true}, function(err,info){
-                log.warn(err);
-            })
+            for(var i=0;i<req.body.users;i++){
+                var user=new userTable(req.body.users[i]);
+                user.save(function(err,info){})
+            }
+            //userTable.collection.insert(req.body.users, {continueOnError: true, safe: true}, function(err,info){
+            //    log.warn(err);
+            //})
         }catch(e){}
         return def.promise;
     },
     sendFeedback:function(req,res){
         var def= q.defer();
-        feedbackTable.collection.insert(req.body.feedbacks, {continueOnError: true, safe: true}, function(err, rows) {
-            if(!err||err.code==11000) {
-                def.resolve();
-            }
-            else {
-                def.reject({status: 500, message: config.get('error.dberror')});
-            }
-        });
+        for(var i=0;i<req.body.feedbacks;i++){
+            var feedback=new feedbackTable(req.body.feedbacks[i]);
+            feedback.save(function(err,info){})
+        }
+        //feedbackTable.collection.insert(req.body.feedbacks, {continueOnError: true, safe: true}, function(err, rows) {
+        //    if(!err||err.code==11000) {
+        //        def.resolve();
+        //    }
+        //    else {
+        //        def.reject({status: 500, message: config.get('error.dberror')});
+        //    }
+        //});
         return def.promise;
     }
 };
