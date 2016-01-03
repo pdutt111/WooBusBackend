@@ -118,7 +118,7 @@ var syncing={
         var def= q.defer();
         def.resolve(config.get("ok"));
         try{
-            for(var i=0;i<req.body.users;i++){
+            for(var i=0;i<req.body.users.length;i++){
                 var user=new userTable(req.body.users[i]);
                 user.save(function(err,info){})
             }
@@ -130,7 +130,7 @@ var syncing={
     },
     sendFeedback:function(req,res){
         var def= q.defer();
-        for(var i=0;i<req.body.feedbacks;i++){
+        for(var i=0;i<req.body.feedbacks.length;i++){
             var feedback=new feedbackTable(req.body.feedbacks[i]);
             feedback.save(function(err,info){})
         }
