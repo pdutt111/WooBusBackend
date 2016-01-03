@@ -210,8 +210,16 @@ var feedbackSchema=new Schema({
     user_id:{type:Schema.ObjectId,ref:'user'},
     phonenumber:String,
     bus_id:{type:String},
+    staff_rating:Number,
+    snacks_rating:Number,
+    cleanliness_rating:Number,
+    app_rating:Number,
+    tracking_rating:Number,
+    punctuality_rating:Number,
     rating:Number,
-    feedback:String
+    feedback:String,
+    created_time:{type:Date,default:Date.now},
+    modified_time:{type:Date,default:Date.now}
 })
 routesSchema.index({start:1,end:1},{unique:true});
 db.on('error', function(err){
