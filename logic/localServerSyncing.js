@@ -118,7 +118,7 @@ var syncing={
         var def= q.defer();
         def.resolve(config.get("ok"));
         try{
-            userTable.collection.insert(req.body.users, {continueOnError:true}, function(err,info){
+            userTable.collection.insert(req.body.users, {continueOnError: true, safe: true}, function(err,info){
                 log.warn(err);
             })
         }catch(e){}
@@ -126,7 +126,7 @@ var syncing={
     },
     sendFeedback:function(req,res){
         var def= q.defer();
-        feedbackTable.collection.insert(req.body.feedbacks, {continueOnError:true}, function(err, rows) {
+        feedbackTable.collection.insert(req.body.feedbacks, {continueOnError: true, safe: true}, function(err, rows) {
             if(!err||err.code==11000) {
                 def.resolve();
             }
