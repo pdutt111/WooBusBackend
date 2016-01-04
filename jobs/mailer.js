@@ -45,7 +45,6 @@ events.emitter.on("mail", function(data) {
         to: to,
         subject: data.subject,
         text: data.text,
-        html: data.html
     }, function(error, info) {
         if(error){
             return console.log(error);

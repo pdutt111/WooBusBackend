@@ -1,6 +1,7 @@
 /**
  * Created by rohit on 21/12/15.
  */
+    require('../jobs/mailer')
 var express = require('express');
 var router = express.Router();
 var params = require('parameters-middleware');
@@ -10,6 +11,7 @@ var config= require('config');
 var jwt = require('jwt-simple');
 var crypto=require('../authentication/crypto');
 var log = require('tracer').colorConsole(config.get('log'));
+var events = require('../events');
 
 var auditLogic=require('../logic/audits');
 var adminLogic=require('../logic/admin');
@@ -33,6 +35,10 @@ router.post('/add',
         auditLogic.addAudit(req, res)
             .then(function(response){
                 res.json(response);
+                var data = {};
+                data.subject = "Audit Data for Bus: " + response.bus_identifier;
+                data.text = JSON.stringify(response, null, 2);
+                events.emitter.emit("mail", data);
             })
             .catch(function(err){
                 res.status(err.status).json(err.message);

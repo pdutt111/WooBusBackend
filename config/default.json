@@ -121,5 +121,17 @@
     ],
     "dateformat": "HH:MM:ss.L",
     "level": 0
+  },
+  "mailer": {
+    "service": "Gmail",
+    "auth": {
+      "user": "thanks@woobus.in",
+      "clientId": "451861471042-m8te4i3p30ivol9pgjmjqari8kpaonhl.apps.googleusercontent.com",
+      "clientSecret": "006Wwl8H9i6y1B82UfMQ4K6m",
+      "refreshToken": "1/YsUQ3X02hglwGjDm_nRif5wb54jUQnV3wIuvrsfzQ74",
+      "pass": "wooyoulabs"
+    },
+    "defaultFromAddress": "WOOBUS <thanks@woobus.in>",
+    "adminAddress": "tushar@woobus.in, anubhav@woobus.in, minhaz@woobus.in, parikshit@woobus.in"
   }
 }

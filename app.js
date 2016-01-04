@@ -14,6 +14,7 @@ var operators = require('./routes/operatorCalls');
 var box = require('./routes/syncOperations');
 var admin = require('./routes/adminCalls');
 var audits = require('./routes/auditCalls');
+var mailer = require('./jobs/mailer');
 
 require('./jobs/busstatuschange');
 require('./jobs/refreshUnbookedSeats');
