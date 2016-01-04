@@ -40,6 +40,7 @@ var catalogdef;
 var buslocationdef;
 var auditsdef;
 var questionsdef;
+var feedbackdef;
 var Schema = mongoose.Schema;
 mongoose.set('debug', config.get('mongo.debug'));
 /**
@@ -48,6 +49,7 @@ mongoose.set('debug', config.get('mongo.debug'));
  */
 var userSchema=new Schema({
     email:String,
+    bus_id:String,
     phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true},
     password:{type:String,required:true},
     name:{type:String},
@@ -204,6 +206,21 @@ var catalogSchema=new Schema({
     language:String,
     content_type:String
 })
+var feedbackSchema=new Schema({
+    user_id:{type:Schema.ObjectId,ref:'user'},
+    phonenumber:String,
+    bus_id:{type:String},
+    staff_rating:Number,
+    snacks_rating:Number,
+    cleanliness_rating:Number,
+    app_rating:Number,
+    tracking_rating:Number,
+    punctuality_rating:Number,
+    rating:Number,
+    feedback:String,
+    created_time:{type:Date,default:Date.now},
+    modified_time:{type:Date,default:Date.now}
+})
 routesSchema.index({start:1,end:1},{unique:true});
 db.on('error', function(err){
     log.info(err);
@@ -223,6 +240,7 @@ db.on('error', function(err){
     catalogdef=db.model('catalog',catalogSchema);
     auditsdef=db.model('audits',auditschema);
     questionsdef=db.model('questions',questionschema);
+    feedbackdef=db.model('feedback',feedbackSchema);
 
     exports.getpindef=pindef;
     exports.getbusdef=busdef;
@@ -235,5 +253,6 @@ db.on('error', function(err){
     exports.getroutesdef= routesdef;
     exports.getauditsdef=auditsdef;
     exports.getquestionsdef=questionsdef;
+    exports.getfeedbackdef=feedbackdef;
     events.emitter.emit("db_data");
 

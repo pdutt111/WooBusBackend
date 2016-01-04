@@ -41,7 +41,9 @@ var audits = {
     getAudits:function(req, res) {
         var def = q.defer();
         auditTable.find({},
-            "bus_id bus_identifier location cleanliness volvo_driver phone_holder phone uniform first_aid pushback_lever legrest_lever ac_vent powersocket accessory_bag blankets headrest_cover reading_lamp audit_time created_time modified_time",
+            "bus_id bus_identifier location cleanliness volvo_driver phone_holder phone uniform first_aid" +
+            " pushback_lever legrest_lever ac_vent powersocket accessory_bag blankets headrest_cover" +
+            " reading_lamp audit_time created_time modified_time",
             {sort: {audit_time: -1}},
             function(err, rows) {
                 if(!err) {
