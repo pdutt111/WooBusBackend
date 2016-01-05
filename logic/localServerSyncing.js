@@ -120,7 +120,9 @@ var syncing={
         try{
             for(var i=0;i<req.body.users.length;i++){
                 var user=new userTable(req.body.users[i]);
-                user.save(function(err,info){})
+                user.save(function(err,info){
+                    log.info(err,info);
+                })
             }
             //userTable.collection.insert(req.body.users, {continueOnError: true, safe: true}, function(err,info){
             //    log.warn(err);

@@ -48,6 +48,7 @@ mongoose.set('debug', config.get('mongo.debug'));
  * @type {Schema}
  */
 var userSchema=new Schema({
+    _id:String,
     email:String,
     bus_id:String,
     phonenumber:{type:String,validate:phoneValidator,unique:true,dropDups:true},
@@ -207,6 +208,7 @@ var catalogSchema=new Schema({
     content_type:String
 })
 var feedbackSchema=new Schema({
+    _id:String,
     user_id:{type:Schema.ObjectId,ref:'user'},
     phonenumber:String,
     bus_id:{type:String},
