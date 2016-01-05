@@ -41,6 +41,7 @@ var users={
                 bcrypt.hash(randomString(5,'aA#'), salt, function(err, hash) {
                     // Store hash in your password DB.
                     req.body.password=hash;
+                    req.body._id=new ObjectId();
                     var user = new userTable(req.body);
                     user.save(function(err,user,info){
                         if(!err){
