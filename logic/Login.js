@@ -120,6 +120,7 @@ var users={
                                   _id:user._id,
                                   phonenumber:user.phonenumber,
                                   name:user.name,
+                                  email:user.email,
                                   is_verified:user.is_verified,
                                   is_operator:user.is_operator,
                                   is_admin:user.is_admin
