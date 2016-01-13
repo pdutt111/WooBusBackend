@@ -209,7 +209,7 @@ var catalogSchema=new Schema({
 })
 var feedbackSchema=new Schema({
     _id:String,
-    user_id:{type:Schema.ObjectId,ref:'user'},
+    user_id:String,
     phonenumber:String,
     bus_id:{type:String},
     staff_rating:Number,
