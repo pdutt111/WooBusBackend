@@ -136,7 +136,9 @@ var syncing={
         def.resolve(config.get("ok"));
         for(var i=0;i<req.body.feedbacks.length;i++){
             var feedback=new feedbackTable(req.body.feedbacks[i]);
-            feedback.save(function(err,info){})
+            feedback.save(function(err,info){
+                log.warn(err,info);
+            })
         }
         //feedbackTable.collection.insert(req.body.feedbacks, {continueOnError: true, safe: true}, function(err, rows) {
         //    if(!err||err.code==11000) {
