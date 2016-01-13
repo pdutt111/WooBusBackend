@@ -132,6 +132,8 @@ var syncing={
     },
     sendFeedback:function(req,res){
         var def= q.defer();
+        log.info(req.body.feedbacks);
+        def.resolve(config.get("ok"));
         for(var i=0;i<req.body.feedbacks.length;i++){
             var feedback=new feedbackTable(req.body.feedbacks[i]);
             feedback.save(function(err,info){})
