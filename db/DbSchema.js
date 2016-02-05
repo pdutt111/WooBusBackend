@@ -150,7 +150,7 @@ var auditschema=new Schema({
     location:{type:[Number], index:"2dsphere"},
     cleanliness:Number,
     volvo_driver:Boolean,
-    phone_holder:Boolean,
+    phone_holder:{all:Boolean, info:String},
     phone:Boolean,
     uniform:Boolean,
     first_aid:Boolean,
