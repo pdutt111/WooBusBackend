@@ -119,6 +119,8 @@ var syncing={
         def.resolve(config.get("ok"));
         try{
             for(var i=0;i<req.body.users.length;i++){
+                req.body.users[i].created_time=new Date();
+                req.body.users[i].modified_time=new Date();
                 var user=new userTable(req.body.users[i]);
                 user.save(function(err,info){
                     log.info(err,info);
