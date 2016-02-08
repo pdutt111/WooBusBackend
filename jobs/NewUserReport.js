@@ -21,7 +21,7 @@ var job = new CronJob({
     onTick: function() {
         var today=new Date();
         today.setHours(0,0,0,0);
-
+        log.info(today.toUTCString());
         userTable.find({created_time:{$gte:today}},function(err,rows){
             if(!err&&rows.length!=0){
                 events.emitter.emit("mail",{to:'parikshit@woobus.in,tushar@woobus.in',subject:"New Users today",text:JSON.stringify(rows)});
@@ -31,7 +31,7 @@ var job = new CronJob({
             }
         })
     },
-    cronTime: '20 * * * * *',
+    cronTime: '0 0 23 * * *',
     start: false,
     timeZone: 'Asia/Kolkata'
 });
